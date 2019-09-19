@@ -114,8 +114,7 @@ namespace UnityEngine.Rendering.LWRP
             if (renderingData.cameraData.isStereoEnabled && renderingData.cameraData.requiresDepthTexture)
                 requiresDepthPrepass = true;
 
-            bool createColorTexture = RequiresIntermediateColorTexture(ref renderingData, cameraTargetDescriptor)
-                                      || rendererFeatures.Count != 0;
+            bool createColorTexture = RequiresIntermediateColorTexture2(ref renderingData, cameraTargetDescriptor);
 
             // If camera requires depth and there's no depth pre-pass we create a depth texture that can be read
             // later by effect requiring it.
@@ -347,6 +346,30 @@ namespace UnityEngine.Rendering.LWRP
 
             return requiresBlitForOffscreenCamera || cameraData.isSceneViewCamera || isScaledRender || cameraData.isHdrEnabled ||
                    !isCompatibleBackbufferTextureDimension || !cameraData.isDefaultViewport || isCapturing || Display.main.requiresBlitToBackbuffer
+                   || (renderingData.killAlphaInFinalBlit && !isStereoEnabled);
+        }
+
+        bool RequiresIntermediateColorTexture2(ref RenderingData renderingData, RenderTextureDescriptor baseDescriptor)
+        {
+            ref CameraData cameraData = ref renderingData.cameraData;
+            int msaaSamples = cameraData.cameraTargetDescriptor.msaaSamples;
+            bool isStereoEnabled = renderingData.cameraData.isStereoEnabled;
+            bool isScaledRender = !Mathf.Approximately(cameraData.renderScale, 1.0f);
+            bool isCompatibleBackbufferTextureDimension = baseDescriptor.dimension == TextureDimension.Tex2D;
+            bool requiresExplicitMsaaResolve = msaaSamples > 1 && !SystemInfo.supportsMultisampleAutoResolve;
+            bool isOffscreenRender = cameraData.camera.targetTexture != null && !cameraData.isSceneViewCamera;
+            bool isCapturing = cameraData.captureActions != null;
+
+            if (isStereoEnabled)
+                isCompatibleBackbufferTextureDimension = UnityEngine.XR.XRSettings.deviceEyeTextureDimension == baseDescriptor.dimension;
+
+            bool requiresBlitForOffscreenCamera = cameraData.postProcessEnabled || cameraData.requiresOpaqueTexture || requiresExplicitMsaaResolve;
+            if (isOffscreenRender)
+                return requiresBlitForOffscreenCamera;
+
+            // Removed Display.main.requiresBlitToBackbuffer == true condition
+            return requiresBlitForOffscreenCamera || cameraData.isSceneViewCamera || isScaledRender || cameraData.isHdrEnabled ||
+                   !isCompatibleBackbufferTextureDimension || !cameraData.isDefaultViewport || isCapturing
                    || (renderingData.killAlphaInFinalBlit && !isStereoEnabled);
         }
 
