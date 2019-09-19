@@ -3,17 +3,20 @@ using UnityEngine.Rendering;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering.LWRP;
 
+#if UNITY_EDITOR
+using UnityEditor.SceneManagement;
+#endif
+
 namespace UnityEngine.Experimental.Rendering.LWRP
 {
     internal class Render2DLightingPass : ScriptableRenderPass
     {
         static SortingLayer[] s_SortingLayers;
         Renderer2DData m_RendererData;
-        static readonly ShaderTagId k_CombinedRenderingPassName = new ShaderTagId("CombinedShapeLight");
+        static readonly ShaderTagId k_2DRenderingPassName = new ShaderTagId("Lightweight2D");
         static readonly ShaderTagId k_NormalsRenderingPassName = new ShaderTagId("NormalsRendering");
         static readonly ShaderTagId k_LegacyPassName = new ShaderTagId("SRPDefaultUnlit");
-        static readonly List<ShaderTagId> k_ShaderTags = new List<ShaderTagId>() { k_LegacyPassName, k_CombinedRenderingPassName };
-        //static readonly List<ShaderTagId> k_ShaderTags = new List<ShaderTagId>() { k_CombinedRenderingPassName };
+        static readonly List<ShaderTagId> k_ShaderTags = new List<ShaderTagId>() { k_LegacyPassName, k_2DRenderingPassName };
 
         public Render2DLightingPass(Renderer2DData rendererData)
         {
@@ -42,7 +45,17 @@ namespace UnityEngine.Experimental.Rendering.LWRP
 
             cmd.SetGlobalFloat("_HDREmulationScale", m_RendererData.hdrEmulationScale);
             cmd.SetGlobalFloat("_InverseHDREmulationScale", 1.0f / m_RendererData.hdrEmulationScale);
-            RendererLighting.SetShapeLightShaderGlobals(cmd);
+
+
+#if UNITY_EDITOR
+            bool isPreview = false;
+            isPreview = EditorSceneManager.IsPreviewSceneObject(camera);
+
+            if (isPreview)
+                RendererLighting.SetPreviewShaderGlobals(cmd);
+            else
+#endif
+                RendererLighting.SetShapeLightShaderGlobals(cmd);
 
             context.ExecuteCommandBuffer(cmd);
 
@@ -59,12 +72,13 @@ namespace UnityEngine.Experimental.Rendering.LWRP
 
             for (int i = 0; i < s_SortingLayers.Length; i++)
             {
-                // The canvas renderer overrides its sorting layer value with short.MaxValue in the editor.
-                // When drawing the last sorting layer, include the range from layerValue to short.MaxValue
-                // so that UI can be rendered in the scene view.
+                // Some renderers override their sorting layer value with short.MinValue or short.MaxValue.
+                // When drawing the first sorting layer, we should include the range from short.MinValue to layerValue.
+                // Similarly, when drawing the last sorting layer, include the range from layerValue to short.MaxValue.
                 short layerValue = (short)s_SortingLayers[i].value;
+                var lowerBound = (i == 0) ? short.MinValue : layerValue;
                 var upperBound = (i == s_SortingLayers.Length - 1) ? short.MaxValue : layerValue;
-                filterSettings.sortingLayerRange = new SortingLayerRange(layerValue, upperBound);
+                filterSettings.sortingLayerRange = new SortingLayerRange(lowerBound, upperBound);
 
                 int layerToRender = s_SortingLayers[i].id;
 

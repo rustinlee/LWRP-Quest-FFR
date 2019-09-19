@@ -14,8 +14,9 @@ namespace UnityEngine.Rendering.LWRP
         Material m_BlitMaterial;
         TextureDimension m_TargetDimension;
         bool m_ClearBlitTarget;
+        bool m_IsMobileOrSwitch;
         Rect m_PixelRect;
-        
+
         public FinalBlitPass(RenderPassEvent evt, Material blitMaterial)
         {
             m_BlitMaterial = blitMaterial;
@@ -34,6 +35,7 @@ namespace UnityEngine.Rendering.LWRP
             m_Source = colorHandle;
             m_TargetDimension = baseDescriptor.dimension;
             m_ClearBlitTarget = clearBlitTarget;
+            m_IsMobileOrSwitch = Application.isMobilePlatform || Application.platform == RuntimePlatform.Switch;
             m_PixelRect = pixelRect;
         }
 
@@ -62,21 +64,25 @@ namespace UnityEngine.Rendering.LWRP
                 cmd.DisableShaderKeyword(ShaderKeywordStrings.KillAlpha);
 
             ref CameraData cameraData = ref renderingData.cameraData;
+            // Use default blit for XR as we are not sure the UniversalRP blit handles stereo.
+            // The blit will be reworked for stereo along the XRSDK work.
+            Material blitMaterial = (cameraData.isStereoEnabled) ? null : m_BlitMaterial;
+            cmd.SetGlobalTexture("_BlitTex", m_Source.Identifier());
             if (cameraData.isStereoEnabled || cameraData.isSceneViewCamera || cameraData.isDefaultViewport)
             {
-                cmd.Blit(m_Source.Identifier(), BuiltinRenderTextureType.CameraTarget);
+                // This set render target is necessary so we change the LOAD state to DontCare.
+                cmd.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
+                cmd.Blit(m_Source.Identifier(), BuiltinRenderTextureType.CameraTarget, blitMaterial);
             }
             else
             {
-                cmd.SetGlobalTexture("_BlitTex", m_Source.Identifier());
-
                 // TODO: Final blit pass should always blit to backbuffer. The first time we do we don't need to Load contents to tile.
                 // We need to keep in the pipeline of first render pass to each render target to propertly set load/store actions.
                 // meanwhile we set to load so split screen case works.
                 SetRenderTarget(
                     cmd,
                     BuiltinRenderTextureType.CameraTarget,
-                    RenderBufferLoadAction.Load,
+                    m_ClearBlitTarget ? RenderBufferLoadAction.DontCare : RenderBufferLoadAction.Load,
                     RenderBufferStoreAction.Store,
                     m_ClearBlitTarget ? ClearFlag.Color : ClearFlag.None,
                     Color.black,
@@ -85,7 +91,7 @@ namespace UnityEngine.Rendering.LWRP
                 Camera camera = cameraData.camera;
                 cmd.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.identity);
                 cmd.SetViewport(m_PixelRect != Rect.zero ? m_PixelRect : cameraData.camera.pixelRect);
-                cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_BlitMaterial);
+                cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, blitMaterial);
                 cmd.SetViewProjectionMatrices(camera.worldToCameraMatrix, camera.projectionMatrix);
             }
 

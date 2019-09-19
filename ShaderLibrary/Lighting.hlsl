@@ -238,7 +238,7 @@ inline void InitializeBRDFData(half3 albedo, half metallic, half3 specular, half
 
     outBRDFData.grazingTerm = saturate(smoothness + reflectivity);
     outBRDFData.perceptualRoughness = PerceptualSmoothnessToPerceptualRoughness(smoothness);
-    outBRDFData.roughness = PerceptualRoughnessToRoughness(outBRDFData.perceptualRoughness);
+    outBRDFData.roughness = max(PerceptualRoughnessToRoughness(outBRDFData.perceptualRoughness), HALF_MIN);
     outBRDFData.roughness2 = outBRDFData.roughness * outBRDFData.roughness;
 
     outBRDFData.normalizationTerm = outBRDFData.roughness * 4.0h + 2.0h;
@@ -287,10 +287,10 @@ half3 DirectBDRF(BRDFData brdfData, half3 normalWS, half3 lightDirectionWS, half
     half LoH2 = LoH * LoH;
     half specularTerm = brdfData.roughness2 / ((d * d) * max(0.1h, LoH2) * brdfData.normalizationTerm);
 
-    // on mobiles (where half actually means something) denominator have risk of overflow
+    // On platforms where half actually means something, the denominator has a risk of overflow
     // clamp below was added specifically to "fix" that, but dx compiler (we convert bytecode to metal/gles)
     // sees that specularTerm have only non-negative terms, so it skips max(0,..) in clamp (leaving only min(100,...))
-#if defined (SHADER_API_MOBILE)
+#if defined (SHADER_API_MOBILE) || defined (SHADER_API_SWITCH)
     specularTerm = specularTerm - HALF_MIN;
     specularTerm = clamp(specularTerm, 0.0, 100.0); // Prevent FP16 overflow on mobiles
 #endif

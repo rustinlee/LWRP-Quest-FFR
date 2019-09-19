@@ -13,7 +13,7 @@ Shader "Lightweight Render Pipeline/2D/Sprite-Lit-Default"
 
     SubShader
     {
-        Tags { "RenderType" = "Transparent" "RenderPipeline" = "LightweightPipeline" }
+        Tags {"Queue" = "Transparent" "RenderType" = "Transparent" "RenderPipeline" = "LightweightPipeline" }
 
         Blend SrcAlpha OneMinusSrcAlpha
         Cull Off
@@ -21,7 +21,7 @@ Shader "Lightweight Render Pipeline/2D/Sprite-Lit-Default"
 
         Pass
         {
-            Tags { "LightMode" = "CombinedShapeLight" }
+            Tags { "LightMode" = "Lightweight2D" }
             HLSLPROGRAM
             #pragma prefer_hlslcc gles
             #pragma vertex CombinedShapeLightVertex
@@ -35,18 +35,18 @@ Shader "Lightweight Render Pipeline/2D/Sprite-Lit-Default"
             {
                 float3 positionOS   : POSITION;
                 float4 color        : COLOR;
-                half2  uv           : TEXCOORD0;
+                float2  uv           : TEXCOORD0;
             };
 
             struct Varyings
             {
                 float4  positionCS  : SV_POSITION;
                 float4  color       : COLOR;
-                half2	uv          : TEXCOORD0;
-                half2	lightingUV  : TEXCOORD1;
+                float2	uv          : TEXCOORD0;
+                float2	lightingUV  : TEXCOORD1;
             };
 
-            #include "Include/LightingUtility.hlsl"
+            #include "Packages/com.unity.render-pipelines.lightweight/Shaders/2D/Include/LightingUtility.hlsl"
 
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
@@ -81,16 +81,11 @@ Shader "Lightweight Render Pipeline/2D/Sprite-Lit-Default"
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 float4 clipVertex = o.positionCS / o.positionCS.w;
                 o.lightingUV = ComputeScreenPos(clipVertex).xy;
-
-                #if UNITY_UV_STARTS_AT_TOP
-                o.lightingUV.y = 1.0 - o.lightingUV.y;
-                #endif
-
                 o.color = v.color;
                 return o;
             }
 
-            #include "Include/CombinedShapeLightShared.hlsl"
+            #include "Packages/com.unity.render-pipelines.lightweight/Shaders/2D/Include/CombinedShapeLightShared.hlsl"
 
             half4 CombinedShapeLightFragment(Varyings i) : SV_Target
             {
@@ -114,14 +109,14 @@ Shader "Lightweight Render Pipeline/2D/Sprite-Lit-Default"
             {
                 float3 positionOS   : POSITION;
                 float4 color		: COLOR;
-                half2  uv			: TEXCOORD0;
+                float2 uv			: TEXCOORD0;
             };
 
             struct Varyings
             {
                 float4  positionCS		: SV_POSITION;
                 float4  color			: COLOR;
-                half2	uv				: TEXCOORD0;
+                float2	uv				: TEXCOORD0;
                 float3  normalWS		: TEXCOORD1;
                 float3  tangentWS		: TEXCOORD2;
                 float3  bitangentWS		: TEXCOORD3;
@@ -138,9 +133,6 @@ Shader "Lightweight Render Pipeline/2D/Sprite-Lit-Default"
                 Varyings o = (Varyings)0;
 
                 o.positionCS = TransformObjectToHClip(attributes.positionOS);
-                #if UNITY_UV_STARTS_AT_TOP
-                    o.positionCS.y = -o.positionCS.y;
-                #endif
                 o.uv = TRANSFORM_TEX(attributes.uv, _NormalMap);
                 o.uv = attributes.uv;
                 o.color = attributes.color;
@@ -150,7 +142,7 @@ Shader "Lightweight Render Pipeline/2D/Sprite-Lit-Default"
                 return o;
             }
 
-            #include "Include/NormalsRenderingShared.hlsl"
+            #include "Packages/com.unity.render-pipelines.lightweight/Shaders/2D/Include/NormalsRenderingShared.hlsl"
 
             float4 NormalsRenderingFragment(Varyings i) : SV_Target
             {
@@ -158,9 +150,53 @@ Shader "Lightweight Render Pipeline/2D/Sprite-Lit-Default"
                 float3 normalTS = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, i.uv));
                 return NormalsRenderingShared(mainTex, normalTS, i.tangentWS.xyz, i.bitangentWS.xyz, -i.normalWS.xyz);
             }
+            ENDHLSL
+        }
+        Pass
+        {
+            Tags { "LightMode" = "LightweightForward" "Queue"="Transparent" "RenderType"="Transparent"}
 
+            HLSLPROGRAM
+            #pragma prefer_hlslcc gles
+            #pragma vertex UnlitVertex
+            #pragma fragment UnlitFragment
 
+            struct Attributes
+            {
+                float3 positionOS   : POSITION;
+                float4 color		: COLOR;
+                float2 uv			: TEXCOORD0;
+            };
+
+            struct Varyings
+            {
+                float4  positionCS		: SV_POSITION;
+                float4  color			: COLOR;
+                float2	uv				: TEXCOORD0;
+            };
+
+            TEXTURE2D(_MainTex);
+            SAMPLER(sampler_MainTex);
+            float4 _MainTex_ST;
+
+            Varyings UnlitVertex(Attributes attributes)
+            {
+                Varyings o = (Varyings)0;
+
+                o.positionCS = TransformObjectToHClip(attributes.positionOS);
+                o.uv = TRANSFORM_TEX(attributes.uv, _MainTex);
+                o.uv = attributes.uv;
+                o.color = attributes.color;
+                return o;
+            }
+
+            float4 UnlitFragment(Varyings i) : SV_Target
+            {
+                float4 mainTex = i.color * SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv);
+                return mainTex;
+            }
             ENDHLSL
         }
     }
+    Fallback "Hidden/Sprite-Fallback"
 }
