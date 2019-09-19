@@ -96,30 +96,28 @@ namespace UnityEngine.Rendering.LWRP.Tests
             Assert.AreSame(light2, Light2DManager.lights[0][2]);
         }
 
-        [Test]
-        public void IsLightVisibleReturnsTrueIfInCameraView()
+        [UnityTest]
+        public IEnumerator IsLightVisibleReturnsTrueIfInCameraView()
         {
             var camera = m_TestObject1.AddComponent<Camera>();
             var light = m_TestObject2.AddComponent<Light2D>();
             light.transform.position = camera.transform.position;
             Light2D.SetupCulling(default(ScriptableRenderContext), camera);
 
-            // We can only verify the results after culling is done on this camera.
-            camera.Render();
+            yield return null;
 
             Assert.IsTrue(light.IsLightVisible(camera));
         }
 
-        [Test]
-        public void IsLightVisibleReturnsFalseIfNotInCameraView()
+        [UnityTest]
+        public IEnumerator IsLightVisibleReturnsFalseIfNotInCameraView()
         {
             var camera = m_TestObject1.AddComponent<Camera>();
             var light = m_TestObject2.AddComponent<Light2D>();
             light.transform.position = camera.transform.position + new Vector3(9999.0f, 0.0f, 0.0f);
             Light2D.SetupCulling(default(ScriptableRenderContext), camera);
 
-            // We can only verify the results after culling is done on this camera.
-            camera.Render();
+            yield return null;
 
             Assert.IsFalse(light.IsLightVisible(camera));
         }
