@@ -1,129 +1,217 @@
 # Changelog
-All notable changes to this package will be documented in this file.
+All notable changes to this package are documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [6.9.1] - 2019-07-29
-
-### Fixed
-- Fixed fp16 overflow in Switch in specular calculation
-- Fixed shader compilation errors for Android XR projects.
-- Fixed garbage collection spikes caused by LWRP allocating heap memory every frame.
-- Fixed BeforeTransparent post-processing not working.
-- Fixed issue that caused scene to render darker in GLES3 and linear color space. [case 1169789](https://issuetracker.unity3d.com/issues/lwrp-android-scene-is-rendered-darker-in-build-when-graphics-api-set-to-gles3-and-color-space-set-to-linear)
-
-## [6.9.0] - 2019-07-05
-### Fixed
-- Fixed an issue where using LWRP and Sprite Shape together would produce meta file conflicts.
-- Tilemap tiles no longer appear black when you use the 2D renderer.
-- Sprites in the preview window are no longer lit by 2D Scene lighting.
-
-## [6.8.0] - 2019-06-12
+## [Unreleased]
 ### Added
-- Added a menu option to create a new `ScriptableRendererFeature` script. To do so in the Editor, click on Asset > Create > Rendering > Lightweight Render Pipeline > Renderer Feature.
-- Added documentation for SpeedTree Shaders in LWRP.
-- Added documentation overview for how Post Processing Version 2 works in LWRP.
-- Added documentation notes and FAQ entry on the 2D Renderer affecting the LWRP Asset.
+- Added samples for Procedural Patterns to the package.
+- You can now use the right-click context menu to delete Sticky Notes.
+- You can now save your graph as a new Asset.
+- Added support for vertex skinning when you use the DOTS animation package.
+- You can now use the right-click context menu to set the precision on multiple selected nodes.
+- When you start the Editor, Shader Graph now displays Properties in the Blackboard as collapsed.
+- Updated the zoom level to let you zoom in further.
+- If Unity Editor Analytics are enabled, Shader Graph collects anonymous data about which nodes you use in your graphs. This helps the Shader Graph team focus our efforts on the most common graph scenarios, and better understand the needs of our customers. We don't track edge data and cannot recreate your graphs in any form.
+- The Create Node Menu now has a tree view and support for fuzzy field searching.
+- When a Shader Graph or Sub Graph Asset associated with a open window has been deleted, Unity now displays a dialog that asks whether you would like to save the graph as a new Asset or close the window.
+- Added a drop-down menu to the PBR Master Node that lets you select the final coordinate space of normals delivered from the fragment function. 
+- Added support for users to drag and drop Blackboard Properties from one graph to another.
 
 ### Changed
-- Replaced beginCameraRendering callbacks by non obsolete implementation in Light2D
-- Updated `ScriptableRendererFeature` and `ScriptableRenderPass` API docs.
+- Changed the `Branch` node so that it uses a ternary operator (`Out = bool ? a : B`) instead of a linear interpolate function.
 
 ### Fixed
-- Fixed NullReference exception caused when trying to add a ScriptableRendererFeature.
-- Fixed an issue that caused forward renderer resources to not load properly when you upgraded LWRP from an older version to 6.8.0. [case 1154925](https://issuetracker.unity3d.com/issues/lwrp-upgrading-lwrp-package-to-7-dot-0-0-breaks-forwardrenderdata-asset-in-resource-files)
-- Fixed GC spikes caused by LWRP allocating heap memory every frame.
-- Fixed distortion effect on particle unlit shader.
-- Fixed issue with certain LWRP shaders not showing when using forward/2D renderer.
-- Fixed the shadow resolve pass and the final pass, so they're not consuming unnecessary bandwidth. [case 1152439](https://issuetracker.unity3d.com/issues/lwrp-mobile-increased-memory-usage-and-extra-rendering-steps) 
-- Added missing page for 2D Lights in LWRP.
-- Fixed warnings for unsupported shadow map formats for GLES2 API.
-- Disabled shadows for devices that do not support shadow maps or depth textures.
+- Edges no longer produce errors when you save a Shader Graph.
+- Shader Graph no longer references the `NUnit` package.
+- Fixed a shader compatibility issue in the SRP Batcher when you use a hybrid instancing custom variable.
+- Fixed an issue where Unity would crash when you imported a Shader Graph Asset with invalid formatting.
+- Fixed an issue with the animated preview when there is no Camera with animated Materials in the Editor.
+- Triplanar nodes no longer use Camera-relative world space by default in HDRP.
+- Errors no longer occur when you activate `Enable GPU Instancing` on Shader Graph Materials. [1184870](https://issuetracker.unity3d.com/issues/universalrp-shader-compilation-error-when-using-gpu-instancing)
+- Errors no longer occur when there are multiple tangent transform nodes on a graph. [1185752](https://issuetracker.unity3d.com/issues/shadergraph-fails-to-compile-with-redefinition-of-transposetangent-when-multiple-tangent-transform-nodes-are-plugged-in)
+- The Main Preview for Sprite Lit and Sprite Unlit master nodes now displays the correct color. [1184656](https://issuetracker.unity3d.com/issues/shadergraph-preview-for-lit-and-unlit-master-node-wrong-color-when-color-is-set-directly-on-master-node)
+- Shader Graph shaders in `Always Include Shaders` no longer crash builds. [1191757](https://issuetracker.unity3d.com/issues/lwrp-build-crashes-when-built-with-shadergraph-file-added-to-always-include-shaders-list)
+- The `Transform` node now correctly transforms Absolute World to Object.
+- Errors no longer occur when you change the precision of Sub Graphs. [1158413](https://issuetracker.unity3d.com/issues/shadergraph-changing-precision-of-sg-with-subgraphs-that-still-use-the-other-precision-breaks-the-generated-shader)
+- Fixed an error where the UV channel drop-down menu on nodes had clipped text. [1188710](https://issuetracker.unity3d.com/issues/shader-graph-all-uv-dropdown-value-is-clipped-under-shader-graph)
+- Added StencilOverride support.
+- Sticky Notes can now be grouped properly.
+- Fixed an issue where nodes couldn't be copied from a group.
+- Fixed an issue where adding the first output to a Sub Graph without any outputs prior caused Shader Graphs containing the Sub Graph to break.
+- Fixed an issue where Shader Graph shaders using the `CameraNode` failed to build on PS4 with "incompatible argument list for call to 'mul'".
+- Fixed a bug that caused problems with Blackboard property ordering.
+- Fixed a bug where the redo functionality in Shader Graph often didn't work.
+- Fixed a bug where using the Save As command on a Sub Graph raised an exception.
+- Fixed a bug where the input fields sometimes didn't render properly. [1176268](https://issuetracker.unity3d.com/issues/shadergraph-input-fields-get-cut-off-after-minimizing-and-maximizing-become-unusable)
+- Fixed a bug where the Gradient property didn't work with all system locales. [1140924](https://issuetracker.unity3d.com/issues/shader-graph-shader-doesnt-compile-when-using-a-gradient-property-and-a-regional-format-with-comma-decimal-separator-is-used)
+- Fixed a bug where Properties in the Blackboard could have duplicate names.
+- Fixed a bug where you could drag the Blackboard into a graph even when you disabled the Blackboard.
+- Fixed a bug where the `Vertex Normal` slot on master nodes needed vertex normal data input to compile. [1193348](https://issuetracker.unity3d.com/issues/hdrp-unlit-shader-plugging-anything-into-the-vertex-normal-input-causes-shader-to-fail-to-compile)
+- Fixed a bug where `GetWorldSpaceNormalizeViewDir()` could cause undeclared indentifier errors. [1190606](https://issuetracker.unity3d.com/issues/view-dir-node-plugged-into-vertex-position-creates-error-undeclared-identifier-getworldspacenormalizeviewdir)
+- Fixed a bug where Emission on PBR Shader Graphs in the Universal RP would not bake to lightmaps. [1190225](https://issuetracker.unity3d.com/issues/emissive-custom-pbr-shadergraph-material-only-works-for-primitive-unity-objects)
+- Fixed a bug where Shader Graph shaders were writing to `POSITION` instead of `SV_POSITION`, which caused PS4 builds to fail.
+- Fixed a bug where `Object to Tangent` transforms in the `Transform` node used the wrong matrix. [1162203](https://issuetracker.unity3d.com/issues/shadergraph-transform-node-from-object-to-tangent-space-uses-the-wrong-matrix)
+- Fixed an issue where boolean keywords in a Shader Graph caused HDRP Material features to fail. [1204827](https://issuetracker.unity3d.com/issues/hdrp-shadergraph-adding-a-boolean-keyword-to-an-hdrp-lit-shader-makes-material-features-not-work)
+- Fixed a bug where Object space normals scaled with Object Scale. 
+- Documentation links on nodes now point to the correct URLs and package versions.
+- Fixed an issue where Sub Graphs sometimes had duplicate names when you converted nodes into Sub Graphs. 
+- Fixed an issue where the number of ports on Keyword nodes didn't update when you added or removed Enum Keyword entries.
+- Fixed an issue where colors in graphs didn't update when you changed a Blackboard Property's precision while the Color Mode is set to Precision.
+- Fixed a bug where custom mesh in the Master Preview didn't work.
+- Fixed a number of memory leaks that caused Shader Graph assets to stay in memory after closing the Shader Graph window.
+- You can now smoothly edit controls on the `Dielectric Specular` node.
+- Fixed Blackboard Properties to support scientific notation.
+- Fixed a bug where the error `Output value 'vert' is not initialized` displayed on all PBR graphs in Universal. [1210710](https://issuetracker.unity3d.com/issues/output-value-vert-is-not-completely-initialized-error-is-thrown-when-pbr-graph-is-created-using-urp)
+- Fixed a bug where PBR and Unlit master nodes in Universal had Alpha Clipping enabled by default.
+- Fixed an issue in where analytics wasn't always working.
+- Fixed a bug where undo would make the Master Preview visible regardless of its toggle status.
+- Fixed a bug where any change to the PBR master node settings would lose connection to the normal slot. 
+- Fixed a bug where the user couldn't open up HDRP Master Node Shader Graphs without the Render Pipeline set to HDRP.
+- Fixed a bug where adding a HDRP Master Node to a Shader Graph would softlock the Shader Graph.
+- Fixed a bug where shaders fail to compile due to `#pragma target` generation when your system locale uses commas instead of periods.
+- Fixed a compilation error when using Hybrid Renderer due to incorrect positioning of macros.
 
-## [6.7.0] - 2019-05-16
+## [7.1.1] - 2019-09-05
 ### Added
-- Added SpeedTree Shaders.
-- Added two Shader Graph master nodes: Lit Sprite and Unlit Sprite. They only work with the 2D renderer.
-- Added documentation for the 2D renderer.
+- You can now define shader keywords on the Blackboard. Use these keywords on the graph to create static branches in the generated shader.
+- The tab now shows whether you are working in a Sub Graph or a Shader Graph file.
+- The Shader Graph importer now bakes the output node type name into a meta-data object.
+
+### Fixed
+- The Shader Graph preview no longer breaks when you create new PBR Graphs.
+- Fixed an issue where deleting a group and a property at the same time would cause an error.
+- Fixed the epsilon that the Hue Node uses to avoid NaN on platforms that support half precision.
+- Emission nodes no longer produce errors when you use them in Sub Graphs.
+- Exposure nodes no longer produce errors when you use them in Sub Graphs.
+- Unlit master nodes no longer define unnecessary properties in the Universal Render Pipeline.
+- Errors no longer occur when you convert a selection to a Sub Graph.
+- Color nodes now handle Gamma and Linear conversions correctly.
+- Sub Graph Output nodes now link to the correct documentation page.
+- When you use Keywords, PBR and Unlit master nodes no longer produce errors.
+- PBR master nodes now calculate Global Illumination (GI) correctly.
+- PBR master nodes now apply surface normals.
+- PBR master nodes now apply fog.
+- The Editor now displays correct errors for missing or deleted Sub Graph Assets.
+- You can no longer drag and drop recursive nodes onto Sub Graph Assets.
+
+## [7.0.1] - 2019-07-25
+### Changed
+- New Shader Graph windows are now docked to either existing Shader Graph windows, or to the Scene View.
+
+### Fixed
+- Fixed various dependency tracking issues with Sub Graphs and HLSL files from Custom Function Nodes.
+- Fixed an error that previously occurred when you used `Sampler State` input ports on Sub Graphs.
+- `Normal Reconstruct Z` node is now compatible with both fragment and vertex stages. 
+- `Position` node now draws the correct label for **Absolute World**. 
+- Node previews now inherit preview type correctly.
+- Normal maps now unpack correctly for mobile platforms.
+- Fixed an error that previously occurred when you used the Gradient Sample node and your system locale uses commas instead of periods.
+- Fixed an issue where you couldn't group several nodes.
+
+## [7.0.0] - 2019-07-10
+### Added
+- You can now use the `SHADERGRAPH_PREVIEW` keyword in `Custom Function Node` to generate different code for preview Shaders.
+- Color Mode improves node visibility by coloring the title bar by Category, Precision, or custom colors.
+- You can now set the precision of a Shader Graph and individual nodes.
+- Added the `_TimeParameters` variable which contains `Time`, `Sin(Time)`, and `Cosine(Time)`
+- _Absolute World_ space on `Position Node` now provides absolute world space coordinates regardless of the active render pipeline.
+- You can now add sticky notes to graphs.
 
 ### Changed
-- The 2D renderer and Light2D component received a number of improvements and are now ready to try as experimental features.
-- Updated the [Feature Comparison Table](lwrp-builtin-feature-comparison.md) to reflect the current state of LWRP features.
+- The `Custom Function Node` now uses an object field to reference its source when using `File` mode.
+- To enable master nodes to generate correct motion vectors for time-based vertex modification, time is now implemented as an input to the graph rather than as a global uniform.
+- **World** space on `Position Node` now uses the default world space coordinates of the active render pipeline. 
 
 ### Fixed
-- When in playmode, the error 'Non matching Profiler.EndSample' no longer appears. [case 1140750](https://fogbugz.unity3d.com/f/cases/1140750/)
-- LWRP Particle Shaders now correctly render in stereo rendering modes. [case 1106699](https://fogbugz.unity3d.com/f/cases/1106699/)
-- Shaders with 'debug' in the name are no longer stripped automatically. [case 1112983](https://fogbugz.unity3d.com/f/cases/1112983/)
-- Fixed tiling issue with selection outline and baked cutout shadows.
-- in the Shadergraph Unlit Master node, Premultiply no longer acts the same as Alpha. [case 1114708](https://fogbugz.unity3d.com/f/cases/1114708/)
-- Fixed an issue where Lightprobe data was missing if it was needed per-pixel and GPU instancing was enabled.
-- The Soft ScreenSpaceShadows Shader variant no longer gets stripped form builds. [case 1138236](https://fogbugz.unity3d.com/f/cases/1138236/)
-- Fixed a typo in the Particle Unlit Shader, so Soft Particles now work correctly.
-- Fixed emissive Materials not being baked for some meshes. [case 1145297](https://issuetracker.unity3d.com/issues/lwrp-emissive-materials-are-not-baked)
-- Camera matrices are now correctly set up when you call rendering functions in EndCameraRendering. [case 1146586](https://issuetracker.unity3d.com/issues/lwrp-drawmeshnow-returns-wrong-positions-slash-scales-when-called-from-endcamerarendering-hook)
-- Fixed GI not baking correctly while in gamma color space.
-- Fixed a NullReference exception when adding a renderer feature that is contained in a global namespace. [case 1147068](https://issuetracker.unity3d.com/issues/scriptablerenderpipeline-inspector-ui-crashes-when-a-scriptablerenderfeature-is-not-in-a-namespace)
-- Shaders are now set up for VR stereo instancing on Vulkan. [case 1142952](https://fogbugz.unity3d.com/f/cases/1142952/).
-- VR stereo matrices and vertex inputs are now set up on Vulkan. [case 1142952](https://fogbugz.unity3d.com/f/cases/1142952/).
-- Fixed the Material Upgrader so it's now run upon updating the LWRP package. [1148764](https://issuetracker.unity3d.com/product/unity/issues/guid/1148764/)
-- Fixed a NullReference exception when you create a new Lightweight Render Pipeline Asset. [case 1153388](https://issuetracker.unity3d.com/product/unity/issues/guid/1153388/) 
-- Fixed a case where built-in Shader time values could be out of sync with actual time. [case 1142495](https://fogbugz.unity3d.com/f/cases/1142495/)
+- Fixed an error in `Custom Function Node` port naming.
+- `Sampler State` properties and nodes now serialize correctly.
+- Labels in the Custom Port menu now use the correct coloring when using the Personal skin.
+- Fixed an error that occured when creating a Sub Graph from a selection containing a Group Node.
+- When you change a Sub Graph, Shader Graph windows now correctly reload.
+- When you save a Shader Graph, all other Shader Graph windows no longer re-compile their preview Shaders.
+- Shader Graph UI now draws with correct styling for 2019.3.
+- When deleting edge connections to nodes with a preview error, input ports no longer draw in the wrong position.
+- Fixed an error involving deprecated components from VisualElements.
+- When you convert nodes to a Sub Graph, the nodes are now placed correctly in the Sub Graph.
+- The `Bitangent Vector Node` now generates all necessary shader requirements.
+
+## [6.7.0-preview] - 2019-05-16
+### Added
+- Added a hidden path namespace for Sub Graphs to prevent certain Sub Graphs from populating the Create Node menu.
+
+### Changed
+- Anti-aliasing (4x) is now enabled on Shader Graph windows.
+
+### Fixed
+- When you click on the gear icon, Shader Graph now focuses on the selected node, and brings the settings menu to front view.
+- Sub Graph Output and Custom Function Node now validate slot names, and display an appropriate error badge when needed.
+- Remaining outdated documentation has been removed. 
+- When you perform an undo or redo to an inactive Shader Graph window, the window no longer breaks.
+- When you rapidly perform an undo or redo, Shader Graph windows no longer break.
+- Sub Graphs that contain references to non-existing Sub Graphs no longer break the Sub Graph Importer.
+- You can now reference sub-assets such as Textures.
+- You can now reference Scene Color and Scene Depth correctly from within a Sub Graph.
+- When you create a new empty Sub Graph, it no longer shows a warning about a missing output.
+- When you create outputs that start with a digit, Shader generation no longer fails.
+- You can no longer add nodes that are not allowed into Sub Graphs.
+- A graph must now always contain at least one Master Node.
+- Duplicate output names are now allowed.
+- Fixed an issue where the main preview was always redrawing.
+- When you set a Master Node as active, the Main Preview now shows the correct result.
+- When you save a graph that contains a Sub Graph node, the Shader Graph window no longer freezes.
+- Fixed an error that occured when using multiple Sampler State nodes with different parameters.
+- Fixed an issue causing default inputs to be misaligned in certain cases.
+- You can no longer directly connect slots with invalid types. When the graph detects that situation, it now doesn't break and gives an error instead.
 
 ## [6.6.0] - 2019-04-01
 ### Added
-- Added support for Baked Indirect mixed lighting.
-- You can now use Light Probes for occlusion. This means that baked lights can now occlude dynamic objects.
-- Added RenderObjects. You can add RenderObjects to a Renderer to perform custom rendering.
-- (WIP) Added an experimental 2D renderer that implements a 2D lighting system.
-- (WIP) Added a Light2D component that works with the 2D renderer to add lighting effects to 2D sprites.
-
-### Fixed
-- Fixed a project import issue in the LWRP template.
-- Fixed the warnings that appear when you create new Unlit Shader Graphs using the Lightweight Render Pipeline.
-- Fixed light attenuation precision on mobile platforms.
-- Fixed split-screen rendering on mobile platforms.
-- Fixed rendering when using an off-screen camera that renders to a depth texture.
-- Fixed the exposed stencil render state in the renderer.
-- Fixed the default layer mask so it's now applied to a depth pre-pass.
-- Made several improvements and fixes to the render pass UI.
-- Fixed artifacts that appeared due to precision errors in large scaled objects.
-- Fixed an XR rendering issue where Unity required a depth texture.
-- Fixed an issue that caused transparent objects to sort incorrectly.
-
-## [6.5.0] - 2019-03-07
-### Added
-- You can now create a custom forward renderer by clicking on `Assets/Create/Rendering/Lightweight Render Pipeline/Forward Renderer`. This creates an Asset in your Project. You can add additional features to it and drag-n-drop the renderer to either the pipeline Asset or to a camera.
-- You can now add `ScriptableRendererFeature`  to the `ScriptableRenderer` to extend it with custom effects. A feature is an `ScriptableObject` that can be drag-n-dropped in the renderer and adds one or more `ScriptableRenderPass` to the renderer.
-- `ScriptableRenderer` now exposes interface to configure lights. To do so, implement `SetupLights` when you create a new renderer.
-- `ScriptableRenderer` now exposes interface to configure culling. To do so, implement `SetupCullingParameters` when you create a new renderer.
-- `ScriptableRendererData` contains rendering resources for `ScriptableRenderer`. A renderer can be overridden globally for all cameras or on a per-camera basis.
-- `ScriptableRenderPass` now has a `RenderPassEvents`. This controls where in the pipeline the render pass is added.
-- `ScriptableRenderPass` now exposes `ConfigureTarget` and `ConfigureClear`. This allows the renderer to automatically figure out the currently active rendering targets.
-- `ScriptableRenderPass` now exposes `Blit`. This performs a blit and sets the active render target in the renderer.
-- `ScriptableRenderPass` now exposes `RenderPostProcessing`. This renders post-processing and sets the active render target in the renderer.
-- `ScriptableRenderPass` now exposes `CreateDrawingSettings` as a helper for render passes that need to call `ScriptableRenderContext.DrawRenderers`.
+- You can now add Matrix, Sampler State and Gradient properties to the Blackboard.
+- Added Custom Function node. Use this node to define a custom HLSL function either via string directly in the graph, or via a path to an HLSL file.
+- You can now group nodes by pressing Ctrl + G.
+- Added "Delete Group and Contents" and removed "Ungroup All Nodes" from the context menu for groups.
+- You can now use Sub Graphs in other Sub Graphs.
+- Preview shaders now compile in the background, and only redraw when necessary.
 
 ### Changed
-- Removed `RegisterShaderPassName` from `ScriptableRenderPass`. Instead, `CreateDrawingSettings` now  takes one or a list of `ShaderTagId`. 
-- Removed remaining experimental namespace from LWRP. All APIrelated to `ScriptableRenderer`, `ScriptableRenderPass`, and render pass injection is now out of preview.
-- Removed `SetRenderTarget` from `ScriptableRenderPass`. You should never call it. Instead, call `ConfigureTarget`, and the renderer automatically sets up targets for you. 
-- Removed `RenderFullscreenQuad` from `ScriptableRenderer`. Use `CommandBuffer.DrawMesh` and `RenderingUtils.fullscreenMesh` instead.
-- Removed `RenderPostProcess` from `ScriptableRenderer`. Use `ScriptableRenderPass.RenderPostProcessing` instead.
-- Removed `postProcessingContext` property from `ScriptableRenderer`. This is now exposed in `RenderingUtils.postProcessingContext`.
-- Removed `GetCameraClearFlag` from `ScriptableRenderer`.
+- Removed Blackboard fields, which had no effect on Sub Graph input ports, from the Sub Graph Blackboard.
+- Subgraph Output node is now called Outputs.
+- Subgraph Output node now supports renaming of ports.
+- Subgraph Output node now supports all port types.
+- Subgraph Output node now supports reordering ports.
+- When you convert nodes to a Sub Graph, Shader Graph generates properties and output ports in the Sub Graph, and now by default, names those resulting properties and output ports based on their types.
+- When you delete a group, Shader Graph now deletes the Group UI, but doesn't delete the nodes inside.
 
 ### Fixed
-- Fixed y-flip in VR when post-processing is active.
-- Fixed occlusion mesh for VR not rendering before rendering opaques.
-- Enabling or disabling SRP Batcher in runtime works now.
-- Fixed video player recorder when post-processing is enabled.
+- You can now undo edits to Vector port default input fields.
+- You can now undo edits to Gradient port default input fields.
+- Boolean port input fields now display correct values when you undo changes.
+- Vector type properties now behave as expected when you undo changes.
+- Fixed an error that previously occurred when you opened saved Shader Graphs containing one or more Voronoi nodes.
+- You can now drag normal map type textures on to a Shader Graph to create Sample Texture 2D nodes with the correct type set.
+- Fixed the Multiply node so default input values are applied correctly.
+- Added padding on input values for Blend node to prevent NaN outputs.
+- Fixed an issue where `IsFaceSign` would not compile within Sub Graph Nodes.
+- Null reference errors no longer occur when you remove ports with connected edges.
+- Default input fields now correctly hide and show when connections change.
+
+## [6.5.0] - 2019-03-07
+
+### Fixed
+- Fixed master preview for HDRP master nodes when alpha clip is enabled.
 
 ## [6.4.0] - 2019-02-21
+### Fixed
+- Fixed the Transform node, so going from Tangent Space to any other space now works as expected.
 
 ## [6.3.0] - 2019-02-18
+### Fixed
+- Fixed an issue where the Normal Reconstruct Z Node sometimes caused Not a Number (NaN) errors when using negative values.
 
 ## [6.2.0] - 2019-02-15
+### Fixed
+- Fixed the property blackboard so it no longer goes missing or turns very small.
 
 ### Changed
 - Code refactor: all macros with ARGS have been swapped with macros with PARAM. This is because the ARGS macros were incorrectly named.
@@ -132,386 +220,160 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [6.0.0] - 2019-02-23
 ### Added
-- You can now implement a custom renderer for LWRP. To do so, implement an `IRendererData` that contains all resources used in rendering. Then create an `IRendererSetup` that creates and queues `ScriptableRenderPass`. Change the renderer type either in the Pipeline Asset or in the Camera Inspector.
-- LWRP now uses the Unity recorder extension. You can use this to capture the output of Cameras.
-- You can now inject a custom render pass before LWRP renders opaque objects. To do so, implement an `IBeforeRender` interface.
-- Distortion support in all Particle Shaders.
-- An upgrade system for LWRP Materials with `MaterialPostprocessor`.
-- An upgrade path for Unlit shaders
-- Tooltips for Shaders.
-- SRP Batcher support for Particle Shaders.
-- Docs for these Shaders: Baked Lit, Particles Lit, Particles Simple Lit, and Particles Unlit.
-- LWRP now supports dynamic resolution scaling. The target platform must also support it.
-- LWRP now includes version defines for both C# and Shaders in the format of `LWRP_X_Y_Z_OR_NEWER`. For example, `LWRP_5_3_0_OR_NEWER` defines version 5.3.0.
-- The Terrain Lit Shader now samples Spherical Harmonics if you haven't baked any lightmaps for terrain.
-- Added a __Priority__ option, which you can use to tweak the rendering order. This is similar to render queue in the built-in render pipeline. These Shaders now have this option: Lit, Simple Lit, Baked Lit, Unlit, and all three Particle Shaders.
-- Added support for overriding terrain detail rendering shaders, via the render pipeline editor resources asset.
+- When you hover your cursor over a property in the blackboard, this now highlights the corresponding property elements in your Shader Graph. Similarly, if you hover over a property in the Shader Graph itself, this highlights the corresponding property in the blackboard.
+- Property nodes in your Shader Graph now have a similar look and styling as the properties in the blackboard.
 
 ### Changed
-- You can now only initialize a camera by setting a Background Type. The supported options are Skybox, Solid Color, and Don't Care.
-- LWRP now uses non-square shadowmap textures when it renders directional shadows with 2 shadow cascades. 
-- LWRP now uses RGB111110 as the HDR format on mobile devices, when this format is supported.
-- Removed `IAfterDepthPrePass` interface.
-- We’ve redesigned the Shader GUI. For example, all property names in Shaders are now inline across the board
-- The Simple Lit Shader now has Smoothness, which can be stored in the alpha of specular or albedo maps.
-- The Simple Lit and Particles Simple Lit Shaders now take shininess from the length (brightness) of the specular map.
-- The __Double sided__ property is now __Render Face__. This means you can also do front face culling.
-- Changed the docs for Lit Shader, Simple Lit Shader and Unlit Shader according to Shader GUI changes.
-- When you create a new LWRP Asset, it will now be initialized with settings that favor performance on mobile platforms.
-- Updated the [FAQ](faq.md) and the [Built-in/LWRP feature comparison table](lwrp-builtin-feature-comparison.md).
+- Errors in the compiled shader are now displayed as badges on the appropriate node.
+- In the `Scene Depth` node you can now choose the depth sampling mode: `Linear01`, `Raw` or `Eye`.
 
 ### Fixed
-- Several tweaks to reduce bandwidth consumption on mobile devices.
-- The foldouts in the Lightweight Asset inspector UI now remember their state.
-- Added missing meta file for GizmosRenderingPass.cs.
-- Fixed artifacts when using multiple or Depth Only cameras. [Case 1072615](https://issuetracker.unity3d.com/issues/ios-using-multiple-cameras-in-the-scene-in-lightweight-render-pipeline-gives-corrupted-image-in-ios-device)
-- Fixed a typo in ERROR_ON_UNSUPPORTED_FUNCTION() that was causing the shader compiler to run out of memory in GLES2. [Case 1104271](https://issuetracker.unity3d.com/issues/mobile-os-restarts-because-of-high-memory-usage-when-compiling-shaders-for-opengles2)
-- LWRP now renders shadows on scaled objects correctly. [Case 1109017](https://issuetracker.unity3d.com/issues/scaled-objects-render-shadows-and-specularity-incorrectly-in-the-lwrp-on-device)
-- LWRP now allows some Asset settings to be changed at runtime. [Case 1105552](https://issuetracker.unity3d.com/issues/lwrp-changing-render-scale-in-runtime-has-no-effect-since-lwrp-3-dot-3-0)
-- Realtime shadows now work in GLES2. [Case 1087251](https://issuetracker.unity3d.com/issues/android-lwrp-no-real-time-light-and-shadows-using-gles2)
-- Framedebugger now renders correctly when stepping through drawcalls.
-- Cameras that request MSAA and Opaque Textures now use less frame bandwidth when they render.
-- Fixed rendering in the gamma color space, so it doesn't appear darker.
-- Particles SImple Lit and Particles Unlit Shaders now work correctly.
-- __Soft Particles__ now work correctly.
-- Camera fading for particles.
-- Fixed a typo in the Unlit `IgnoreProjector` tag.
-- Particles render in both eyes with stereo instancing
-- Fixed specular issues on mobile. [case 1109017](https://issuetracker.unity3d.com/issues/scaled-objects-render-shadows-and-specularity-incorrectly-in-the-lwrp-on-device)
-- Fixed issue causing LWRP to create MSAA framebuffer even when MSAA setting was disabled.
-- Post-processing in mobile VR is now forced to be disabled. It was causing many rendering issues.
-- Fixed Editor Previews breaking in Play Mode when VR is enabled. [Case 1109009](https://issuetracker.unity3d.com/issues/lwrp-editor-previews-break-in-play-mode-if-vr-is-enabled)
-- A camera's HDR enable flag is now respected when rendering in XR.
-- Terrain detail rendering now works correctly when LWRP is installed but inactive.
+- When you convert an inline node to a `Property` node, this no longer allows duplicate property names.
+- When you move a node, you'll now be asked to save the Graph file.
+- You can now Undo edits to Property parameters on the Blackboard.
+- You can now Undo conversions between `Property` nodes and inline nodes.
+- You can now Undo moving a node.
+- You can no longer select the `Texture2D` Property type `Mode`, if the Property is not exposed.
+- The `Vector1` Property type now handles default values more intuitively when switching `Mode` dropdown.
+- The `Color` node control is now a consistent width.
+- Function declarations no longer contain double delimiters.
+- The `Slider` node control now functions correctly.
+- Fixed an issue where the Editor automatically re-imported Shader Graphs when there were changes to the asset database.
+- Reverted the visual styling of various graph elements to their previous correct states.
+- Previews now repaint correctly when Unity does not have focus.
+- Code generation now works correctly for exposed Vector1 shader properties where the decimal separator is not a dot.
+- The `Rotate About Axis` node's Modes now use the correct function versions.
+- Shader Graph now preserves grouping when you convert nodes between property and inline.
+- The `Flip` node now greys out labels for inactive controls.
+- The `Boolean` property type now uses the `ToggleUI` property attribute, so as to not generate keywords.
+- The `Normal Unpack` node no longer generates errors in Object space.
+- The `Split` node now uses values from its default Port input fields.
+- The `Channel Mask` node now allows multiple node instances, and no longer generates any errors.
+- Serialized the Alpha control value on the `Flip` node.
+- The `Is Infinite` and `Is NaN` nodes now use `Vector 1` input ports, but the output remains the same.
+- You can no longer convert a node inside a `Sub Graph` into a `Sub Graph`, which previously caused errors.
+- The `Transformation Matrix` node's Inverse Projection and Inverse View Projection modes no longer produce errors.
+- The term `Shader Graph` is now captilized correctly in the Save Graph prompt. 
 
 ## [5.2.0] - 2018-11-27
 ### Added
-- LWRP now handles blits that are required by the device when rendering to the backbuffer.
-- You can now enable the SRP Batcher. To do so, go to the `Pipeline Asset`. Under `Advanced`, toggle `SRP Batcher`.
+- Shader Graph now has __Group Node__, where you can group together several nodes. You can use this to keep your Graphs organized and nice.
 
-### Changed
-- Renamed shader variable `unity_LightIndicesOffsetAndCount` to `unity_PerObjectLightData`.
-- Shader variables `unity_4LightIndices0` and `unity_4LightIndices1` are now declared as `unity_PerObjectLightIndices` array.
+### Fixed
+- The expanded state of blackboard properties are now remembered during a Unity session.
 
 ## [5.1.0] - 2018-11-19
 ### Added
-- The user documentation for LWRP is now in this GitHub repo, instead of in the separate GitHub wiki. You can find the most up-to-date pages in the [TableOfContents.md](TableOfCotents.md) file. Pages not listed in that file are still in progress.
+- You can now show and hide the Main Preview and the Blackboard from the toolbar.
 
 ### Changed
-- The LWRP package is no longer in preview.
-- LWRP built-in render passes are now internal.
-- Changed namespace from `UnityEngine.Experimental.Rendering.LightweightPipeline` to `UnityEngine.Rendering.LWRP`.
-- Changed namespace from `UnityEditor.Experimental.Rendering.LightweightPipeline` to `UnityEditor.Rendering.LWRP`.
+- The Shader Graph package is no longer in preview.
+- Moved `NormalBlendRNM` node to a dropdown option on `Normal Blend` node.
+- `Sample Cubemap` node now has a `SamplerState` slot.
+- New Sub Graph assets now default to the "Sub Graphs" path in the Create Node menu.
+- New Shader Graph assets now default to the "Shader Graphs" path in the Shader menu.
+- The `Light Probe` node is now a `Baked GI` node. When you use LWRP with lightmaps, this node now returns the correct lightmap data. This node is supported in HDRP.
+- `Reflection Probe` nodes now only work with LWRP. This solves compilation errors in HDRP.
+- `Ambient` nodes now only work with LWRP. This solves compilation errors in HDRP.
+- `Fog` nodes now only work with LWRP. This solves compilation errors in HDRP.
+- In HDRP, the `Position` port for the `Object` node now returns the absolute world position.
+- The `Baked GI`, `Reflection Probe`, and `Ambient` nodes are now in the `Input/Lighting` category.
+- The master node no longer has its own preview, because it was redundant. You can see the results for the master node in the Main Preview.
 
 ### Fixed
-- LWRP now respects the iOS Player setting **Force hard shadows**. When you enable this setting, hardware filtering of shadows is disabled.
-- Scene view mode now renders baked lightmaps correctly. [Case 1092227](https://issuetracker.unity3d.com/issues/lwrp-scene-view-modes-render-objects-black)
-- Shadow bias calculations are now correct for both Shader Graph and Terrain shaders.
-- Blit shader now ignores culling.
-- When you select __Per Vertex__ option for __Additional Lights__, the __Per Object Limit__ option is not greyed out anymore.
-- When you change camera viewport height to values above 1.0, the Unity Editor doesn't freeze anymore. [Case 1097497](https://issuetracker.unity3d.com/issues/macos-lwrp-editor-freezes-after-changing-cameras-viewport-rect-values)
-- When you use AR with LWRP, the following error message is not displayed in the console anymore: "The camera list passed to the render pipeline is either null or empty."
+- Shadow projection is now correct when using the `Unlit` master node with HD Render Pipeline.
+- Removed all direct references to matrices
+- `Matrix Construction` nodes with different `Mode` values now evaluate correctly.
+- `Is Front Face` node now works correctly when connected to `Alpha` and `AlphaThreshold` slots on the `PBR` master node.
+- Corrected some instances of incorrect port dimensions on several nodes.
+- `Scene Depth` and `Scene Color` nodes now work in single pass stereo in Lightweight Render Pipeline.
+- `Channel Mask` node controls are now aligned correctly.
+- In Lightweight Render Pipeline, Pre-multiply surface type now matches the Lit shader. 
+- Non-exposed properties in the blackboard no longer have a green dot next to them.
+- Default reference name for shader properties are now serialized. You cannot change them after initial creation.
+- When you save Shader Graph and Sub Graph files, they're now automatically checked out on version control.
+- Shader Graph no longer throws an exception when you double-click a folder in the Project window.
+- Gradient Node no longer throws an error when you undo a deletion.
 
 ## [5.0.0-preview] - 2018-09-28
-### Added
-- Added occlusion mesh rendering/hookup for VR
-- You can now configure default depth and normal shadow bias values in the pipeline asset.
-- You can now add the `LWRPAdditionalLightData` component to a `Light` to override the default depth and normal shadow bias.
-- You can now log the amount of shader variants in your build. To do so, go to the `Pipeline Asset`. Under `Advanced`, select and set the `Shader Variant Log Level`.
-### Changed
-- Removed the `supportedShaderFeatures` property from LWRP core. The shader stripper now figures out which variants to strip based on the current assigned pipeline Asset in the Graphics settings.
-### Fixed
-- The following error does not appear in console anymore: ("Begin/End Profiler section mismatch")
-- When you select a material with the Lit shader, this no longer causes the following error in the console: ("Material doesn't have..."). [case 1092354](https://fogbugz.unity3d.com/f/cases/1092354/)
-- In the Simple Lit shader, per-vertex additional lights are now shaded properly.
-- Shader variant stripping now works when you're building a Project with Cloud Build. This greatly reduces build times from Cloud Build.
-- Dynamic Objects now receive lighting when the light mode is set to mixed.
-- MSAA now works on Desktop platforms.
-- The shadow bias value is now computed correctly for shadow cascades and different shadow resolutions. [case 1076285](https://issuetracker.unity3d.com/issues/lwrp-realtime-directional-light-shadow-maps-exhibit-artifacts)
-- When you use __Area Light__ with LWRP, __Cast Shadows__ no longer overlaps with other UI elements in the Inspector. [case 1085363](https://issuetracker.unity3d.com/issues/inspector-area-light-cast-shadows-ui-option-is-obscured-by-render-mode-for-lwrp-regression-in-2018-dot-3a3)
-
-### Changed
-Read/write XRGraphicsConfig -> Read-only XRGraphics interface to XRSettings. 
 
 ## [4.0.0-preview] - 2018-09-28
 ### Added
-- When you have enabled Gizmos, they now appear correctly in the Game view.
-- Added requiresDepthPrepass field to RenderingData struct to tell if the runtime platform requires a depth prepass to generate a camera depth texture.
-- The `RenderingData` struct now holds a reference to `CullResults`.
-- When __HDR__ is enabled in the Camera but disabled in the Asset, an information box in the Camera Inspector informs you about it.
-- When __MSAA__ is enabled in the Camera but disabled in the Asset, an information box in the Camera Inspector informs you about it.
-- Enabled instancing on the terrain shader.
-- Sorting of opaque objects now respects camera `opaqueSortMode` setting.
-- Sorting of opaque objects disables front-to-back sorting flag, when camera settings allow that and the GPU has hidden surface removal.
-- LWRP now has a Custom Light Explorer that suits its feature set.
-- LWRP now supports Vertex Lit shaders for detail meshes on terrain.
-- LWRP now has three interactive Autodesk shaders: Autodesk Interactive, Autodesk Interactive Masked and Autodesk Interactive Transparent.
-- [Shader API] The `GetMainLight` and `GetAdditionalLight` functions can now compute shadow attenuation and store it in the new `shadowAttenuation` field in `LightData` struct.
-- [Shader API] Added a `VertexPositionInputs` struct that contains vertex position in difference spaces (world, view, hclip).
-- [Shader API] Added a `GetVertexPositionInputs` function to get an initialized `VertexPositionInputs`.
-- [Shader API] Added a `GetPerObjectLightIndex` function to return the per-object index given a for-loop index.
-- [Shader API] Added a `GetShadowCoord` function that takes a `VertexPositionInputs` as input.
-- [ShaderLibrary] Added VertexNormalInputs struct that contains data for per-pixel normal computation.
-- [ShaderLibrary] Added GetVertexNormalInputs function to return an initialized VertexNormalInputs.
+- Shader Graph now supports the High Definition Render Pipeline with both PBR and Unlit Master nodes. Shaders built with Shader Graph work with both the Lightweight and HD render pipelines.
+- You can now modify vertex position via the Position slot on the PBR and Unlit Master nodes. By default, the input to this node is object space position. Custom inputs to this slot should specify the absolute local position of a given vertex. Certain nodes (such as Procedural Shapes) are not viable in the vertex shader. Such nodes are incompatible with this slot.
+- You can now edit the Reference name for a property. To do so, select the property and type a new name next to Reference. If you want to reset to the default name, right-click Reference, and select Reset reference.
+- In the expanded property window, you can now toggle whether the property is exposed.
+- You can now change the path of Shader Graphs and Sub Graphs. When you change the path of a Shader Graph, this modifies the location it has in the shader selection list. When you change the path of Sub Graph, it will have a different location in the node creation menu.
+- Added `Is Front Face` node. With this node, you can change graph output depending on the face sign of a given fragment. If the current fragment is part of a front face, the node returns true. For a back face, the node returns false. Note: This functionality requires that you have enabled **two sided** on the Master node.
+- Gradient functionality is now available via two new nodes: Sample Gradient and Gradient Asset. The Sample Gradient node samples a gradient given a Time parameter. You can define this gradient on the Gradient slot control view. The Gradient Asset node defines a gradient that can be sampled by multiple Sample Gradient nodes using different Time parameters.
+- Math nodes now have a Waves category. The category has four different nodes: Triangle wave, Sawtooth wave, Square wave, and Noise Sine wave. The Triangle, Sawtooth, and Square wave nodes output a waveform with a range of -1 to 1 over a period of 1. The Noise Sine wave outputs a standard Sine wave with a range of -1 to 1 over a period of 2 * pi. For variance, random noise is added to the amplitude of the Sine wave, within a determined range.
+- Added `Sphere Mask` node for which you can indicate the starting coordinate and center point. The sphere mask uses these with the **Radius** and **Hardness** parameters. Sphere mask functionality works in both 2D and 3D spaces, and is based on the vector coordinates in the **Coords and Center** input.
+- Added support for Texture 3D and Texture 2D Array via two new property types and four new nodes.
+- A new node `Texture 2D LOD` has been added for LOD functionality on a Texture 2D Sample. Sample Texture 2D LOD uses the exact same input and output slots as Sample Texture 2D, but also includes an input for level of detail adjustments via a Vector1 slot.
+- Added `Texel Size` node, which allows you to get the special texture properties of a Texture 2D Asset via the `{texturename}_TexelSize` variable. Based on input from the Texture 2D Asset, the node outputs the width and height of the texel size in Vector1 format.
+- Added `Rotate About Axis` node. This allows you to rotate a 3D vector space around an axis. For the rotation, you can specify an amount of degrees or a radian value.
+- Unpacking normal maps in object space.
+- Unpacking derivative maps option on sample texture nodes.
+- Added Uint type for instancing support.
+- Added HDR option for color material slots.
+- Added definitions used by new HD Lit Master node.
+- Added a popup control for a string list.
+- Added conversion type (position/direction) to TransformNode.
+- In your preview for nodes that are not master nodes, pixels now display as pink if they are not finite.
 
 ### Changed
-- The `RenderingData` struct is now read-only.
-- `ScriptableRenderer`always performs a Clear before calling `IRendererSetup::Setup.` 
-- `ScriptableRenderPass::Execute` no longer takes `CullResults` as input. Instead, use `RenderingData`as input, since that references `CullResults`.
-- `IRendererSetup_Setup` no longer takes `ScriptableRenderContext` and `CullResults` as input.
-- Shader includes are now referenced via package relative paths instead of via the deprecated shader export path mechanism https://docs.unity3d.com/2018.3/Documentation/ScriptReference/ShaderIncludePathAttribute.html.
-- The LWRP Asset settings were re-organized to be more clear.
-- Vertex lighting now controls if additional lights should be shaded per-vertex or per-pixel.
-- Renamed all `Local Lights` nomenclature to `Additional Lights`.
-- Changed shader naming to conform to our SRP shader code convention.
-- [Shader API] Renamed `SpotAttenuation` function to `AngleAttenuation`.
-- [Shader API] Renamed `_SHADOWS_ENABLED` keyword to `_MAIN_LIGHT_SHADOWS`
-- [Shader API] Renamed `_SHADOWS_CASCADE` keyword to `_MAIN_LIGHT_SHADOWS_CASCADE`
-- [Shader API] Renamed `_VERTEX_LIGHTS` keyword to `_ADDITIONAL_LIGHTS_VERTEX`.
-- [Shader API] Renamed `_LOCAL_SHADOWS_ENABLED` to `_ADDITIONAL_LIGHT_SHADOWS`
-- [Shader API] Renamed `GetLight` function to `GetAdditionalLight`.
-- [Shader API] Renamed `GetPixelLightCount` function to `GetAdditionalLightsCount`.
-- [Shader API] Renamed `attenuation` to `distanceAttenuation` in `LightData`.
-- [Shader API] Renamed `GetLocalLightShadowStrength` function to `GetAdditionalLightShadowStrength`.
-- [Shader API] Renamed `SampleScreenSpaceShadowMap` functions to `SampleScreenSpaceShadowmap`.
-- [Shader API] Renamed `MainLightRealtimeShadowAttenuation` function to `MainLightRealtimeShadow`.
-- [Shader API] Renamed light constants from `Directional` and `Local` to `MainLight` and `AdditionalLights`.
-- [Shader API] Renamed `GetLocalLightShadowSamplingData` function to `GetAdditionalLightShadowSamplingData`.
-- [Shader API] Removed OUTPUT_NORMAL macro.
-- [Shader API] Removed `lightIndex` and `substractiveAttenuation` from `LightData`.
-- [Shader API] Removed `ComputeShadowCoord` function. `GetShadowCoord` is provided instead.
-- All `LightweightPipeline` references in API and classes are now named `LightweightRenderPipeline`.
-- Files no longer have the `Lightweight` prefix.
-- Renamed Physically Based shaders to `Lit`, `ParticlesLit`, and `TerrainLit`.
-- Renamed Simple Lighting shaders to `SimpleLit`, and `ParticlesSimpleLit`.
-- [ShaderLibrary] Renamed `InputSurfacePBR.hlsl`, `InputSurfaceSimple.hlsl`, and `InputSurfaceUnlit` to `LitInput.hlsl`, `SimpleLitInput.hlsl`, and `UnlitInput.hlsl`. These files were moved from the `ShaderLibrary` folder to the`Shaders`.
-- [ShaderLibrary] Renamed `LightweightPassLit.hlsl` and `LightweightPassLitSimple.hlsl` to `LitForwardPass.hlsl` and `SimpleLitForwardPass.hlsl`. These files were moved from the `ShaderLibrary` folder to `Shaders`.
-- [ShaderLibrary] Renamed `LightweightPassMetaPBR.hlsl`, `LightweightPassMetaSimple.hlsl` and `LighweightPassMetaUnlit` to `LitMetaPass.hlsl`, `SimpleLitMetaPass.hlsl` and `UnlitMetaPass.hlsl`. These files were moved from the `ShaderLibrary` folder to `Shaders`.
-- [ShaderLibrary] Renamed `LightweightPassShadow.hlsl` to `ShadowCasterPass.hlsl`. This file was moved to the `Shaders` folder.
-- [ShaderLibrary] Renamed `LightweightPassDepthOnly.hlsl` to `DepthOnlyPass.hlsl`. This file was moved to the `Shaders` folder.
-- [ShaderLibrary] Renamed `InputSurfaceTerrain.hlsl` to `TerrainLitInput.hlsl`. This file was moved to the `Shaders` folder.
-- [ShaderLibrary] Renamed `LightweightPassLitTerrain.hlsl` to `TerrainLitPases.hlsl`. This file was moved to the `Shaders` folder.
-- [ShaderLibrary] Renamed `ParticlesPBR.hlsl` to `ParticlesLitInput.hlsl`. This file was moved to the `Shaders` folder.
-- [ShaderLibrary] Renamed `InputSurfacePBR.hlsl` to `LitInput.hlsl`. This file was moved to the `Shaders` folder.
-- [ShaderLibrary] Renamed `InputSurfaceUnlit.hlsl` to `UnlitInput.hlsl`. This file was moved to the `Shaders` folder.
-- [ShaderLibrary] Renamed `InputBuiltin.hlsl` to `UnityInput.hlsl`.
-- [ShaderLibrary] Renamed `LightweightPassMetaCommon.hlsl` to `MetaInput.hlsl`.
-- [ShaderLibrary] Renamed `InputSurfaceCommon.hlsl` to `SurfaceInput.hlsl`.
-- [ShaderLibrary] Removed LightInput struct and GetLightDirectionAndAttenuation. Use GetAdditionalLight function instead.
-- [ShaderLibrary] Removed ApplyFog and ApplyFogColor functions. Use MixFog and MixFogColor instead.
-- [ShaderLibrary] Removed TangentWorldToNormal function. Use TransformTangentToWorld instead.
-- [ShaderLibrary] Removed view direction normalization functions. View direction should always be normalized per pixel for accurate results.
-- [ShaderLibrary] Renamed FragmentNormalWS function to NormalizeNormalPerPixel.
+- The settings for master nodes now live in a small window that you can toggle on and off. Here, you can change various rendering settings for your shader.
+- There are two Normal Derive Nodes: `Normal From Height` and `Normal Reconstruct Z`.
+  `Normal From Height` uses Vector1 input to derive a normal map.
+  `Normal Reconstruct Z` uses the X and Y components in Vector2 input to derive the proper Z value for a normal map.
+- The Texture type default input now accepts render textures.
+- HD PBR subshader no longer duplicates surface description code into vertex shader.
+- If the current render pipeline is not compatible, master nodes now display an error badge.
+- The preview shader now only considers the current render pipeline. Because of this there is less code to compile, so the preview shader compiles faster.
+- When you rename a shader graph or sub shader graph locally on your disk, the title of the Shader Graph window, black board, and preview also updates.
+- Removed legacy matrices from Transfomation Matrix node.
+- Texture 2D Array and Texture 3D nodes can no longer be used in the vertex shader.
+- `Normal Create` node has been renamed to `Normal From Texture`.
+- When you close the Shader Graph after you have modified a file, the prompt about saving your changes now shows the file name as well.
+- `Blend` node now supports Overwrite mode.
+- `Simple Noise` node no longer has a loop.
+- The `Polygon` node now calculates radius based on apothem.
+- `Normal Strength` node now calculates Z value more accurately.
+- You can now connect Sub Graphs to vertex shader slots. If a node in the Sub Graph specifies a shader stage, that specific Sub Graph node is locked to that stage. When an instance of a Sub Graph node is connected to a slot that specifies a shader stage, all slots on that instance are locked to the stage.
+- Separated material options and tags.
+- Master node settings are now recreated when a topological modification occurs.
 
 ### Fixed
-- If you have more than 16 lights in a scene, LWRP no longer causes random glitches while rendering lights.
-- The Unlit shader now samples Global Illumination correctly.
-- The Inspector window for the Unlit shader now displays correctly.
-- Reduced GC pressure by removing several per-frame memory allocations.
-- The tooltip for the the camera __MSAA__ property now appears correctly.
-- Fixed multiple C# code analysis rule violations.
-- The fullscreen mesh is no longer recreated upon every call to `ScriptableRenderer.fullscreenMesh`.
-
-## [3.3.0-preview]
-### Added
-- Added callbacks to LWRP that can be attached to a camera (IBeforeCameraRender, IAfterDepthPrePass, IAfterOpaquePass, IAfterOpaquePostProcess, IAfterSkyboxPass, IAfterTransparentPass, IAfterRender)
-
-###Changed
-- Clean up LWRP creation of render textures. If we are not going straight to screen ensure that we create both depth and color targets.
-- UNITY_DECLARE_FRAMEBUFFER_INPUT and UNITY_READ_FRAMEBUFFER_INPUT macros were added. They are necessary for reading transient attachments.
-- UNITY_MATRIX_I_VP is now defined.
-- Renamed LightweightForwardRenderer to ScriptableRenderer.
-- Moved all light constants to _LightBuffer CBUFFER. Now _PerCamera CBUFFER contains all other per camera constants.
-- Change real-time attenuation to inverse square.
-- Change attenuation for baked GI to inverse square, to match real-time attenuation.
-- Small optimization in light attenuation shader code.
-
-### Fixed
-- Lightweight Unlit shader UI doesn't throw an error about missing receive shadow property anymore.
-
-## [3.2.0-preview]
-### Changed
-- Receive Shadows property is now exposed in the material instead of in the renderer.
-- The UI for Lightweight asset has been updated with new categories. A more clean structure and foldouts has been added to keep things organized.
-
-### Fixed
-- Shadow casters are now properly culled per cascade. (case 1059142)
-- Rendering no longer breaks when Android platform is selected in Build Settings. (case 1058812)
-- Scriptable passes no longer have missing material references. Now they access cached materials in the renderer.(case 1061353)
-- When you change a Shadow Cascade option in the Pipeline Asset, this no longer warns you that you've exceeded the array size for the _WorldToShadow property.
-- Terrain shader optimizations.
-
-## [3.1.0-preview]
-
-### Fixed
-- Fixed assert errors caused by multi spot lights
-- Fixed LWRP-DirectionalShadowConstantBuffer params setting
-
-## [3.0.0-preview]
-### Added
-- Added camera additional data component to control shadows, depth and color texture.
-- pipeline now uses XRSEttings.eyeTextureResolutionScale as renderScale when in XR.
-- New pass architecture. Allows for custom passes to be written and then used on a per camera basis in LWRP
-
-### Changed
-- Shadow rendering has been optimized for the Mali Utgard architecture by removing indexing and avoiding divisions for orthographic projections. This reduces the frame time by 25% on the Overdraw benchmark.
-- Removed 7x7 tent filtering when using cascades.
-- Screenspace shadow resolve is now only done when rendering shadow cascades.
-- Updated the UI for the Lighweight pipeline asset.
-- Update assembly definitions to output assemblies that match Unity naming convention (Unity.*).
-
-### Fixed
-- Post-processing now works with VR on PC.
-- PS4 compiler error
-- Fixed VR multiview rendering by forcing MSAA to be off. There's a current issue in engine that breaks MSAA and Texture2DArray.
-- Fixed UnityPerDraw CB layout
-- GLCore compute buffer compiler error
-- Occlusion strength not being applied on LW standard shaders
-- CopyDepth pass is being called even when a depth from prepass is available
-- GLES2 shader compiler error in IntegrationTests
-- Can't set RenderScale and ShadowDistance by script
-- VR Single Pass Instancing shadows
-- Fixed compilation errors on Nintendo Switch (limited XRSetting support).
-
-## [2.0.0-preview]
-
-### Added
-- Explicit render target load/store actions were added to improve tile utilization
-- Camera opaque color can be requested on the pipeline asset. It can be accessed in the shader by defining a _CameraOpaqueTexture. This can be used as an alternative to GrabPass.
-- Dynamic Batching can be enabled in the pipeline asset
-- Pipeline now strips unused or invalid variants and passes based on selected pipeline capabilities in the asset. This reduces build and memory consuption on target.
-- Shader stripping settings were added to pipeline asset
-
-### Changed
-#### Pipeline
-- Pipeline code is now more modular and extensible. A ForwardRenderer class is initialized by the pipeline with RenderingData and it's responsible for enqueueing and executing passes. In the future pluggable renderers will be supported.
-- On mobile 1 directional light + up to 4 local lights (point or spot) are computed
-- On other platforms 1 directional light + up to 8 local lights are computed
-- Multiple shadow casting lights are supported. Currently only 1 directional + 4 spots light shadows.
-#### Shading Framework
-- Directional Lights are always considered a main light in shader. They have a fast shading path with no branching and no indexing.
-- GetMainLight() is provided in shader to initialize Light struct with main light shading data. 
-- Directional lights have a dedicated shadowmap for performance reasons. Shadow coord always comes from interpolator.
-- MainLigthRealtimeShadowAttenuation(float4 shadowCoord) is provided to compute main light realtime shadows.
-- Spot and Point lights are always shaded in the light loop. Branching on uniform and indexing happens when shading them.
-- GetLight(half index, float3 positionWS) is provided in shader to initialize Light struct for spot and point lights.
-- Spot light shadows are baked into a single shadow atlas.
-- Shadow coord for spot lights is always computed on fragment.
-- Use LocalLightShadowAttenuation(int lightIndex, float3 positionWS) to comppute realtime shadows for spot lights.
-
-### Fixed
-- Issue that was causing VR on Android to render black
-- Camera viewport issues
-- UWP build issues
-- Prevent nested camera rendering in the pipeline
-
-## [1.1.4-preview]
-
-### Added
- - Terrain and grass shaders ported
- - Updated materials and shader default albedo and specular color to midgrey.
- - Exposed _ScaledScreenParams to shader. It works the same as _ScreenParams but takes pipeline RenderScale into consideration
- - Performance Improvements in mobile
-
-### Fixed
- - SRP Shader library issue that was causing all constants to be highp in mobile
- - shader error that prevented LWRP to build to UWP
- - shader compilation errors in Linux due to case sensitive includes
- - Rendering Texture flipping issue
- - Standard Particles shader cutout and blending modes
- - crash caused by using projectors
- - issue that was causing Shadow Strength to not be computed on mobile
- - Material Upgrader issue that caused editor to SoftLocks
- - GI in Unlit shader
- - Null reference in the Unlit material shader GUI
-
-## [1.1.2-preview]
-
-### Changed
- - Performance improvements in mobile  
-
-### Fixed
- - Shadows on GLES 2.0
- - CPU performance regression in shadow rendering
- - Alpha clip shadow issues
- - Unmatched command buffer error message
- - Null reference exception caused by missing resource in LWRP
- - Issue that was causing Camera clear flags was being ignored in mobile
-
-
-## [1.1.1-preview]
-
-### Added
- - Added Cascade Split selection UI
- - Added SHADER_HINT_NICE_QUALITY. If user defines this to 1 in the shader Lightweight pipeline will favor quality even on mobile platforms.
-
-### Changed
- - Shadowmap uses 16bit format instead of 32bit.
- - Small shader performance improvements
-
-### Fixed
- - Subtractive Mode
- - Shadow Distance does not accept negative values anymore
-
-
-## [0.1.24]
-
-### Added
- - Added Light abstraction layer on lightweight shader library.
- - Added HDR global setting on pipeline asset. 
- - Added Soft Particles settings on pipeline asset.
- - Ported particles shaders to SRP library
-
-### Changed
- - HDR RT now uses what format is configured in Tier settings.
- - Refactored lightweight standard shaders and shader library to improve ease of use.
- - Optimized tile LOAD op on mobile.
- - Reduced GC pressure
- - Reduced shader variant count by ~56% by improving fog and lightmap keywords
- - Converted LW shader library files to use real/half when necessary.
-
-### Fixed
- - Realtime shadows on OpenGL
- - Shader compiler errors in GLES 2.0
- - Issue sorting issues when BeforeTransparent custom fx was enabled.
- - VR single pass rendering.
- - Viewport rendering issues when rendering to backbuffer.
- - Viewport rendering issues when rendering to with MSAA turned off.
- - Multi-camera rendering.
-
-## [0.1.23]
-
-### Added
- - UI Improvements (Rendering features not supported by LW are hidden)
-
-### Changed
- - Shaders were ported to the new SRP shader library. 
- - Constant Buffer refactor to use new Batcher
- - Shadow filtering and bias improved.
- - Pipeline now updates color constants in gamma when in Gamma colorspace.
- - Optimized ALU and CB usage on Shadows.
- - Reduced shader variant count by ~33% by improving shadow and light classification keywords
- - Default resources were removed from the pipeline asset.
-
-### Fixed
- - Fixed shader include path when using SRP from package manager.
- - Fixed spot light attenuation to match Unity Built-in pipeline.
- - Fixed depth pre-pass clearing issue.
-
-## [0.1.12]
-
-### Added
- - Standard Unlit shader now has an option to sample GI.
- - Added Material Upgrader for stock Unity Mobile and Legacy Shaders.
- - UI improvements
-
-### Changed
-- Realtime shadow filtering was improved. 
-
-### Fixed
- - Fixed an issue that was including unreferenced shaders in the build.
- - Fixed a null reference caused by Particle System component lights.
-
-
-## [0.1.11]
- Initial Release.
+- Vector 1 nodes now evaluate correctly. ([#334](https://github.com/Unity-Technologies/ShaderGraph/issues/334) and [#337](https://github.com/Unity-Technologies/ShaderGraph/issues/337))
+- Properties can now be copied and pasted.
+- Pasting a property node into another graph will now convert it to a concrete node. ([#300](https://github.com/Unity-Technologies/ShaderGraph/issues/300) and [#307](https://github.com/Unity-Technologies/ShaderGraph/pull/307))
+- Nodes that are copied from one graph to another now spawn in the center of the current view. ([#333](https://github.com/Unity-Technologies/ShaderGraph/issues/333))
+- When you edit sub graph paths, the search window no longer yields a null reference exception.
+- The blackboard is now within view when deserialized.
+- Your system locale can no longer cause incorrect commands due to full stops being converted to commas.
+- Deserialization of subgraphs now works correctly.
+- Sub graphs are now suffixed with (sub), so you can tell them apart from other nodes.
+- Boolean and Texture type properties now function correctly in sub-graphs.
+- The preview of a node does not obstruct the selection outliner anymore.
+- The Dielectric Specular node no longer resets its control values.
+- You can now copy, paste, and duplicate sub-graph nodes with vector type input ports.
+- The Lightweight PBR subshader now normalizes normal, tangent, and view direction correctly.
+- Shader graphs using alpha clip now generate correct depth and shadow passes.
+- `Normal Create` node has been renamed to `Normal From Texture`.
+- The preview of nodes now updates correctly.
+- Your system locale can no longer cause incorrect commands due to full stops being converted to commas.
+- `Show Generated Code` no longer throws an "Argument cannot be null" error.
+- Sub Graphs now use the correct generation mode when they generate preview shaders.
+- The `CodeFunctionNode` API now generates correct function headers when you use `DynamicMatrix` type slots.
+- Texture type input slots now set correct default values for 'Normal' texture type.
+- SpaceMaterialSlot now reads correct slot.
+- Slider node control now functions correctly.
+- Shader Graphs no longer display an error message intended for Sub Graphs when you delete properties.
+- The Shader Graph and Sub Shader Graph file extensions are no longer case-sensitive.
+- The dynamic value slot type now uses the correct decimal separator during HLSL generation.
+- Fixed an issue where Show Generated Code could fail when external editor was not set.
+- In the High Definition Render Pipeline, Shader Graph now supports 4-channel UVs.
+- The Lightweight PBR subshader now generates the correct meta pass.
+- Both PBR subshaders can now generate indirect light from emission.
+- Shader graphs now support the SRP batcher.
+- Fixed an issue where floatfield would be parsed according to OS locale settings with .NET 4.6

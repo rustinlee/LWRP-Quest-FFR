@@ -1,13 +1,19 @@
 {
-    "name": "com.unity.render-pipelines.lightweight",
-    "description": "The Lightweight Render Pipeline (LWRP) is a prebuilt Scriptable Render Pipeline, made by Unity. The technology offers graphics that are scalable to mobile platforms, and you can also use it for higher-end consoles and PCs. You’re able to achieve quick rendering at a high quality without needing compute shader technology. LWRP uses simplified, physically based Lighting and Materials. The LWRP uses single-pass forward rendering. Use this pipeline to get optimized real-time performance on several platforms.",
-    "version": "6.9.1",
-    "unity": "2019.2",
-	"unityRelease": "0b9",
-    "displayName": "Lightweight RP",
+    "name": "com.unity.shadergraph",
+    "description": "The Shader Graph package adds a visual Shader editing tool to Unity. You can use this tool to create Shaders in a visual way instead of writing code. Specific render pipelines can implement specific graph features. Currently, both the High Definition Rendering Pipeline and the Universal Rendering Pipeline support Shader Graph.",
+    "version": "9.0.0-preview.0",
+    "unity": "2020.1",
+    "unityRelease": "0a23",
+    "displayName": "Shader Graph",
     "dependencies": {
-        "com.unity.postprocessing": "2.1.6",
-        "com.unity.render-pipelines.core": "6.9.1",
-        "com.unity.shadergraph": "6.9.1"
+        "com.unity.render-pipelines.core": "9.0.0-preview.0",
+        "com.unity.searcher": "4.0.9"
+    },
+	"samples" :[
+		{
+			"displayName":"Procedural Patterns",
+			"description":"This collection of assets showcase various procedural techniques possible with Shader Graph. Use them in your project or edit them to create other procedural pattens. Patterns: Bacteria, Brick, Dots, Grid, Herringbone, Hex Lattice, Houndstooth, Smooth Wave, Spiral, Stripes, Truchet, Whirl, Zig Zag",
+			"path" : "Samples~/ProceduralPatterns"
     }
+	]
 }
