@@ -1,3 +1,0 @@
-# Unity assets are always serialized using lf endings
-*.asset text eol=lf
-*.unitypackage filter=lfs diff=lfs merge=lfs -text

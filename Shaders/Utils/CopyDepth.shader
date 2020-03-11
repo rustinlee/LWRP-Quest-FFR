@@ -1,13 +1,14 @@
-Shader "Hidden/Lightweight Render Pipeline/CopyDepth"
+Shader "Hidden/Universal Render Pipeline/CopyDepth"
 {
     SubShader
     {
-        Tags { "RenderType" = "Opaque" "RenderPipeline" = "LightweightPipeline"}
+        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline"}
 
         Pass
         {
             Name "CopyDepth"
             ZTest Always ZWrite On ColorMask 0
+            Cull Off
 
             HLSLPROGRAM
             // Required to compile gles 2.0 with standard srp library
@@ -16,9 +17,9 @@ Shader "Hidden/Lightweight Render Pipeline/CopyDepth"
             #pragma vertex vert
             #pragma fragment frag
 
-            #pragma multi_compile _DEPTH_NO_MSAA _DEPTH_MSAA_2 _DEPTH_MSAA_4
+            #pragma multi_compile _ _DEPTH_MSAA_2 _DEPTH_MSAA_4 _DEPTH_MSAA_8
 
-            #include "Packages/com.unity.render-pipelines.lightweight/Shaders/Utils/CopyDepthPass.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/Utils/CopyDepthPass.hlsl"
 
             ENDHLSL
         }

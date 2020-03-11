@@ -8,8 +8,8 @@ Shader "Hidden/Light2D-Shape"
 
     SubShader
     {
-        Tags { "Queue" = "Transparent" "RenderType" = "Transparent" "RenderPipeline" = "LightweightPipeline" }
-        
+        Tags { "Queue" = "Transparent" "RenderType" = "Transparent" "RenderPipeline" = "UniversalPipeline" }
+
         Pass
         {
             Blend[_SrcBlend][_DstBlend]
@@ -24,8 +24,8 @@ Shader "Hidden/Light2D-Shape"
             #pragma multi_compile_local USE_NORMAL_MAP __
             #pragma multi_compile_local USE_ADDITIVE_BLENDING __
 
-            #include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Core.hlsl"
-            #include "Include/LightingUtility.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/LightingUtility.hlsl"
 
             struct Attributes
             {
@@ -42,7 +42,9 @@ Shader "Hidden/Light2D-Shape"
                 float4  positionCS  : SV_POSITION;
                 float4  color       : COLOR;
                 float2  uv          : TEXCOORD0;
-                NORMALS_LIGHTING_COORDS(TEXCOORD1, TEXCOORD2)
+
+                SHADOW_COORDS(TEXCOORD1)
+                NORMALS_LIGHTING_COORDS(TEXCOORD2, TEXCOORD3)
             };
 
             float  _InverseHDREmulationScale;
@@ -59,6 +61,7 @@ Shader "Hidden/Light2D-Shape"
             SAMPLER(sampler_FalloffLookup);
 #endif
             NORMALS_LIGHTING_VARIABLES
+            SHADOW_VARIABLES
 
             Varyings vert(Attributes attributes)
             {
@@ -82,6 +85,7 @@ Shader "Hidden/Light2D-Shape"
                 worldSpacePos.xyz = TransformObjectToWorld(positionOS);
                 worldSpacePos.w = 1;
                 TRANSFER_NORMALS_LIGHTING(o, worldSpacePos)
+                TRANSFER_SHADOWS(o)
 
                 return o;
             }
@@ -92,7 +96,7 @@ Shader "Hidden/Light2D-Shape"
 #if SPRITE_LIGHT
                 half4 cookie = SAMPLE_TEXTURE2D(_CookieTex, sampler_CookieTex, i.uv);
     #if USE_ADDITIVE_BLENDING
-                
+
                 color *= cookie * cookie.a;
     #else
                 color *= cookie;
@@ -105,6 +109,7 @@ Shader "Hidden/Light2D-Shape"
     #endif
 #endif
                 APPLY_NORMALS_LIGHTING(i, color);
+                APPLY_SHADOWS(i, color, _ShadowIntensity);
 
                 return color;
             }

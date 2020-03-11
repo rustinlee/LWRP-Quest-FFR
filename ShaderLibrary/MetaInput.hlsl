@@ -1,7 +1,7 @@
-#ifndef LIGHTWEIGHT_META_PASS_INCLUDED
-#define LIGHTWEIGHT_META_PASS_INCLUDED
+#ifndef UNIVERSAL_META_PASS_INCLUDED
+#define UNIVERSAL_META_PASS_INCLUDED
 
-#include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Lighting.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 
 CBUFFER_START(UnityMetaPass)
@@ -23,24 +23,6 @@ struct MetaInput
     half3 Albedo;
     half3 Emission;
     half3 SpecularColor;
-};
-
-struct Attributes
-{
-    float4 positionOS   : POSITION;
-    float3 normalOS     : NORMAL;
-    float2 uv0          : TEXCOORD0;
-    float2 uv1          : TEXCOORD1;
-    float2 uv2          : TEXCOORD2;
-#ifdef _TANGENT_TO_WORLD
-    float4 tangentOS     : TANGENT;
-#endif
-};
-
-struct Varyings
-{
-    float4 positionCS   : SV_POSITION;
-    float2 uv           : TEXCOORD0;
 };
 
 float4 MetaVertexPosition(float4 positionOS, float2 uv1, float2 uv2, float4 uv1ST, float4 uv2ST)

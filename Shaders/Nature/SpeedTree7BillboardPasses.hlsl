@@ -1,7 +1,7 @@
-#ifndef LIGHTWEIGHT_SPEEDTREE7BILLBOARD_PASSES_INCLUDED
-#define LIGHTWEIGHT_SPEEDTREE7BILLBOARD_PASSES_INCLUDED
+#ifndef UNIVERSAL_SPEEDTREE7BILLBOARD_PASSES_INCLUDED
+#define UNIVERSAL_SPEEDTREE7BILLBOARD_PASSES_INCLUDED
 
-#include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Lighting.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "SpeedTree7CommonPasses.hlsl"
 
 void InitializeData(inout SpeedTreeVertexInput input, out half2 outUV, out half outHueVariation)
@@ -71,7 +71,7 @@ SpeedTreeVertexOutput SpeedTree7Vert(SpeedTreeVertexInput input)
 
     // handle speedtree wind and lod
     InitializeData(input, output.uvHueVariation.xy, output.uvHueVariation.z);
-    
+
     VertexPositionInputs vertexInput = GetVertexPositionInputs(input.vertex.xyz);
     half3 normalWS = input.normal; // Already calculated in world space. Can probably get rid of the world space transform in GetVertexPositionInputs too.
 
@@ -116,7 +116,7 @@ SpeedTreeVertexDepthOutput SpeedTree7VertDepth(SpeedTreeVertexInput input)
     // handle speedtree wind and lod
     InitializeData(input, output.uvHueVariation.xy, output.uvHueVariation.z);
     VertexPositionInputs vertexInput = GetVertexPositionInputs(input.vertex.xyz);
-    
+
 #ifdef SHADOW_CASTER
     half3 normalWS = TransformObjectToWorldNormal(input.normal);
     output.clipPos = TransformWorldToHClip(ApplyShadowBias(vertexInput.positionWS, normalWS, _LightDirection));

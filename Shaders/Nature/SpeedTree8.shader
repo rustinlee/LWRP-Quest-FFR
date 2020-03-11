@@ -1,4 +1,4 @@
-Shader "Lightweight Render Pipeline/Nature/SpeedTree8"
+Shader "Universal Render Pipeline/Nature/SpeedTree8"
 {
     Properties
     {
@@ -35,7 +35,7 @@ Shader "Lightweight Render Pipeline/Nature/SpeedTree8"
             "IgnoreProjector"="True"
             "RenderType"="TransparentCutout"
             "DisableBatching"="LODFading"
-            "RenderPipeline" = "LightweightPipeline"
+            "RenderPipeline" = "UniversalPipeline"
         }
         LOD 400
         Cull [_TwoSided]
@@ -43,7 +43,7 @@ Shader "Lightweight Render Pipeline/Nature/SpeedTree8"
         Pass
         {
             Name "ForwardLit"
-            Tags { "LightMode" = "LightweightForward" }
+            Tags { "LightMode" = "UniversalForward" }
 
             HLSLPROGRAM
 
@@ -74,7 +74,7 @@ Shader "Lightweight Render Pipeline/Nature/SpeedTree8"
 
             #include "SpeedTree8Input.hlsl"
             #include "SpeedTree8Passes.hlsl"
-            
+
             ENDHLSL
         }
 
@@ -104,7 +104,7 @@ Shader "Lightweight Render Pipeline/Nature/SpeedTree8"
 
             #include "SpeedTree8Input.hlsl"
             #include "SpeedTree8Passes.hlsl"
-            
+
             ENDHLSL
         }
 
@@ -114,7 +114,7 @@ Shader "Lightweight Render Pipeline/Nature/SpeedTree8"
             Tags{"LightMode" = "ShadowCaster"}
 
             HLSLPROGRAM
-            
+
             #pragma vertex SpeedTree8VertDepth
             #pragma fragment SpeedTree8FragDepth
 
@@ -158,7 +158,7 @@ Shader "Lightweight Render Pipeline/Nature/SpeedTree8"
 
             #define ENABLE_WIND
             #define DEPTH_ONLY
-            
+
             #include "SpeedTree8Input.hlsl"
             #include "SpeedTree8Passes.hlsl"
 

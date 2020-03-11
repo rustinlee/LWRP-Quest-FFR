@@ -1,8 +1,8 @@
-Shader "Hidden/Lightweight Render Pipeline/Blit"
+Shader "Hidden/Universal Render Pipeline/Blit"
 {
     SubShader
     {
-        Tags { "RenderType" = "Opaque" "RenderPipeline" = "LightweightPipeline"}
+        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline"}
         LOD 100
 
         Pass
@@ -20,9 +20,8 @@ Shader "Hidden/Lightweight Render Pipeline/Blit"
             #pragma fragment Fragment
 
             #pragma multi_compile _ _LINEAR_TO_SRGB_CONVERSION
-            #pragma multi_compile _ _KILL_ALPHA
 
-            #include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #ifdef _LINEAR_TO_SRGB_CONVERSION
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
             #endif
@@ -46,7 +45,7 @@ Shader "Hidden/Lightweight Render Pipeline/Blit"
             {
                 Varyings output;
                 output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
-                output.uv = input.uv;
+                output.uv = UnityStereoTransformScreenSpaceTex(input.uv);
                 return output;
             }
 
@@ -55,9 +54,6 @@ Shader "Hidden/Lightweight Render Pipeline/Blit"
                 half4 col = SAMPLE_TEXTURE2D(_BlitTex, sampler_BlitTex, input.uv);
                 #ifdef _LINEAR_TO_SRGB_CONVERSION
                 col = LinearToSRGB(col);
-                #endif
-                #ifdef _KILL_ALPHA
-                col.a = 1.0;
                 #endif
                 return col;
             }

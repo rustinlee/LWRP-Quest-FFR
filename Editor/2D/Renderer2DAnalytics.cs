@@ -1,9 +1,9 @@
 using System;
 using UnityEngine;
 using UnityEngine.Analytics;
-using UnityEngine.Experimental.Rendering.LWRP;
+using UnityEngine.Experimental.Rendering.Universal;
 
-namespace UnityEditor.Experimental.Rendering.LWRP.Analytics
+namespace UnityEditor.Experimental.Rendering.Universal.Analytics
 {
     struct AnalyticsDataTypes
     {
@@ -49,7 +49,7 @@ namespace UnityEditor.Experimental.Rendering.LWRP.Analytics
     {
         const int k_MaxEventsPerHour = 1000;
         const int k_MaxNumberOfElements = 1000;
-        const string k_VendorKey = "unity.renderpipelines.lightweight.editor";
+        const string k_VendorKey = "unity.renderpipelines.universal.editor";
         const int k_Version = 1;
         static Renderer2DAnalytics m_Instance = new Renderer2DAnalytics();
         static bool s_Initialize = false;

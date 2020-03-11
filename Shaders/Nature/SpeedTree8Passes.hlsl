@@ -1,7 +1,7 @@
-#ifndef LIGHTWEIGHT_SPEEDTREE8_PASSES_INCLUDED
-#define LIGHTWEIGHT_SPEEDTREE8_PASSES_INCLUDED
+#ifndef UNIVERSAL_SPEEDTREE8_PASSES_INCLUDED
+#define UNIVERSAL_SPEEDTREE8_PASSES_INCLUDED
 
-#include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Lighting.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
 struct SpeedTreeVertexInput
 {
@@ -21,9 +21,9 @@ struct SpeedTreeVertexOutput
 {
     half2 uv                        : TEXCOORD0;
     half4 color                     : TEXCOORD1;
-    
+
     half4 fogFactorAndVertexLight   : TEXCOORD2;    // x: fogFactor, yzw: vertex light
-    
+
     #ifdef EFFECT_BUMP
         half4 normalWS              : TEXCOORD3;    // xyz: normal, w: viewDir.x
         half4 tangentWS             : TEXCOORD4;    // xyz: tangent, w: viewDir.y
@@ -36,7 +36,7 @@ struct SpeedTreeVertexOutput
     #ifdef _MAIN_LIGHT_SHADOWS
         float4 shadowCoord          : TEXCOORD6;
     #endif
-    
+
     float3 positionWS               : TEXCOORD7;
     float4 clipPos                  : SV_POSITION;
     UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -150,7 +150,7 @@ void InitializeData(inout SpeedTreeVertexInput input, float lodValue)
             input.vertex.xyz = windyPosition;
         }
     #endif
-        
+
     #if defined(EFFECT_BILLBOARD)
         float3 treePos = float3(UNITY_MATRIX_M[0].w, UNITY_MATRIX_M[1].w, UNITY_MATRIX_M[2].w);
         // crossfade faces
@@ -194,7 +194,7 @@ SpeedTreeVertexOutput SpeedTree8Vert(SpeedTreeVertexInput input)
 
     // handle speedtree wind and lod
     InitializeData(input, unity_LODFade.x);
-    
+
     output.uv = input.texcoord.xy;
     output.color = input.color;
 
@@ -205,10 +205,10 @@ SpeedTreeVertexOutput SpeedTree8Vert(SpeedTreeVertexInput input)
         float hueVariationAmount = frac(treePos.x + treePos.y + treePos.z);
         output.color.g = saturate(hueVariationAmount * _HueVariationColor.a);
     #endif
-    
+
     VertexPositionInputs vertexInput = GetVertexPositionInputs(input.vertex.xyz);
     half3 normalWS = TransformObjectToWorldNormal(input.normal);
-    
+
     half3 vertexLight = VertexLighting(vertexInput.positionWS, normalWS);
     half fogFactor = ComputeFogFactor(vertexInput.positionCS.z);
     output.fogFactorAndVertexLight = half4(fogFactor, vertexLight);
@@ -274,7 +274,7 @@ void InitializeInputData(SpeedTreeFragmentInput input, half3 normalTS, out Input
     inputData.normalWS = NormalizeNormalPerPixel(inputData.normalWS);
     inputData.viewDirectionWS = half3(input.interpolated.normalWS.w, input.interpolated.tangentWS.w, input.interpolated.bitangentWS.w);
 #else
-    inputData.normalWS = input.interpolated.normalWS;
+    inputData.normalWS = NormalizeNormalPerPixel(input.interpolated.normalWS);
     inputData.viewDirectionWS = input.interpolated.viewDirWS;
 #endif
 
@@ -300,7 +300,7 @@ half4 SpeedTree8Frag(SpeedTreeFragmentInput input) : SV_Target
 #if !defined(SHADER_QUALITY_LOW)
     #ifdef LOD_FADE_CROSSFADE // enable dithering LOD transition if user select CrossFade transition in LOD group
         #ifdef EFFECT_BILLBOARD
-            LODDitheringTransition(input.interpolated.clipPos.xyz, unity_LODFade.x);
+            LODDitheringTransition(input.interpolated.clipPos.xy, unity_LODFade.x);
         #endif
     #endif
 #endif
@@ -373,8 +373,10 @@ half4 SpeedTree8Frag(SpeedTreeFragmentInput input) : SV_Target
     InputData inputData;
     InitializeInputData(input, normalTs, inputData);
 
-    half4 color = LightweightFragmentPBR(inputData, albedo, metallic, specular, smoothness, occlusion, emission, alpha);
+    half4 color = UniversalFragmentPBR(inputData, albedo, metallic, specular, smoothness, occlusion, emission, alpha);
     color.rgb = MixFog(color.rgb, inputData.fogCoord);
+    color.a = OutputAlpha(color.a);
+
     return color;
 }
 
@@ -385,7 +387,7 @@ half4 SpeedTree8FragDepth(SpeedTreeVertexDepthOutput input) : SV_Target
 #if !defined(SHADER_QUALITY_LOW)
     #ifdef LOD_FADE_CROSSFADE // enable dithering LOD transition if user select CrossFade transition in LOD group
         #ifdef EFFECT_BILLBOARD
-            LODDitheringTransition(input.clipPos.xyz, unity_LODFade.x);
+            LODDitheringTransition(input.clipPos.xy, unity_LODFade.x);
         #endif
     #endif
 #endif

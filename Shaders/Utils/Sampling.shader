@@ -1,4 +1,4 @@
-Shader "Hidden/Lightweight Render Pipeline/Sampling"
+Shader "Hidden/Universal Render Pipeline/Sampling"
 {
     Properties
     {
@@ -6,7 +6,7 @@ Shader "Hidden/Lightweight Render Pipeline/Sampling"
     }
 
     HLSLINCLUDE
-    #include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Core.hlsl"
+    #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
     struct Attributes
     {
@@ -29,7 +29,7 @@ Shader "Hidden/Lightweight Render Pipeline/Sampling"
         UNITY_TRANSFER_INSTANCE_ID(input, output);
 
         output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
-        output.uv = input.texcoord;
+        output.uv = UnityStereoTransformScreenSpaceTex(input.texcoord);
         return output;
     }
 
@@ -50,7 +50,7 @@ Shader "Hidden/Lightweight Render Pipeline/Sampling"
 
     SubShader
     {
-        Tags { "RenderType" = "Opaque" "RenderPipeline" = "LightweightPipeline"}
+        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline"}
         LOD 100
 
         // 0 - Downsample - Box filtering

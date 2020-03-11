@@ -2,12 +2,12 @@ using System;
 using System.Linq;
 using UnityEngine;
 
-namespace UnityEditor.Rendering.LWRP
+namespace UnityEditor.Rendering.Universal
 {
     static class ShadowCascadeSplitGUI
     {
         private const int kSliderbarTopMargin = 2;
-        private const int kSliderbarHeight = 24;
+        private const int kSliderbarHeight = 29;
         private const int kSliderbarBottomMargin = 2;
         private const int kPartitionHandleWidth = 2;
         private const int kPartitionHandleExtraHitAreaWidth = 2;

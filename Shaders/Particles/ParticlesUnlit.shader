@@ -1,9 +1,9 @@
-Shader "Lightweight Render Pipeline/Particles/Unlit"
+Shader "Universal Render Pipeline/Particles/Unlit"
 {
     Properties
     {
-        _BaseMap("Base Map", 2D) = "white" {}
-        _BaseColor("Base Color", Color) = (1,1,1,1)
+        [MainTexture] _BaseMap("Base Map", 2D) = "white" {}
+        [MainColor]   _BaseColor("Base Color", Color) = (1,1,1,1)
 
         _Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
 
@@ -41,10 +41,10 @@ Shader "Lightweight Render Pipeline/Particles/Unlit"
         [HideInInspector] _CameraFadeParams("__camerafadeparams", Vector) = (0,0,0,0)
         [HideInInspector] _DistortionEnabled("__distortionenabled", Float) = 0.0
         [HideInInspector] _DistortionStrengthScaled("Distortion Strength Scaled", Float) = 0.1
-        
+
         // Editmode props
         [HideInInspector] _QueueOffset("Queue offset", Float) = 0.0
-        
+
         // ObsoleteProperties
         [HideInInspector] _FlipbookMode("flipbook", Float) = 0
         [HideInInspector] _Mode("mode", Float) = 0
@@ -53,22 +53,22 @@ Shader "Lightweight Render Pipeline/Particles/Unlit"
 
     SubShader
     {
-        Tags{"RenderType" = "Opaque" "IgnoreProjector" = "True" "PreviewType" = "Plane" "PerformanceChecks" = "False" "RenderPipeline" = "LightweightPipeline"}
-        
+        Tags{"RenderType" = "Opaque" "IgnoreProjector" = "True" "PreviewType" = "Plane" "PerformanceChecks" = "False" "RenderPipeline" = "UniversalPipeline"}
+
         // ------------------------------------------------------------------
         //  Forward pass.
         Pass
         {
-            // Lightmode matches the ShaderPassName set in LightweightRenderPipeline.cs. SRPDefaultUnlit and passes with
-            // no LightMode tag are also rendered by Lightweight Render Pipeline
+            // Lightmode matches the ShaderPassName set in UniversalRenderPipeline.cs. SRPDefaultUnlit and passes with
+            // no LightMode tag are also rendered by Universal Render Pipeline
             Name "ForwardLit"
-            
+
             BlendOp[_BlendOp]
             Blend[_SrcBlend][_DstBlend]
             ZWrite[_ZWrite]
             Cull[_Cull]
             ColorMask RGB
-            
+
             HLSLPROGRAM
             // Required to compile gles 2.0 with standard SRP library
             // All shaders must be compiled with HLSLcc and currently only gles is not using HLSLcc by default
@@ -80,7 +80,7 @@ Shader "Lightweight Render Pipeline/Particles/Unlit"
             // Material Keywords
             #pragma shader_feature _NORMALMAP
             #pragma shader_feature _EMISSION
-            
+
             // -------------------------------------
             // Particle Keywords
             #pragma shader_feature _ _ALPHAPREMULTIPLY_ON _ALPHAMODULATE_ON
@@ -90,19 +90,19 @@ Shader "Lightweight Render Pipeline/Particles/Unlit"
             #pragma shader_feature _SOFTPARTICLES_ON
             #pragma shader_feature _FADING_ON
             #pragma shader_feature _DISTORTION_ON
-            
+
             // -------------------------------------
             // Unity defined keywords
             #pragma multi_compile_fog
 
             #pragma vertex vertParticleUnlit
             #pragma fragment fragParticleUnlit
-            
-            #include "Packages/com.unity.render-pipelines.lightweight/Shaders/Particles/ParticlesUnlitInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.lightweight/Shaders/Particles/ParticlesUnlitForwardPass.hlsl"
-            
+
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/Particles/ParticlesUnlitInput.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/Particles/ParticlesUnlitForwardPass.hlsl"
+
             ENDHLSL
         }
     }
-    CustomEditor "UnityEditor.Rendering.LWRP.ShaderGUI.ParticlesUnlitShader"
+    CustomEditor "UnityEditor.Rendering.Universal.ShaderGUI.ParticlesUnlitShader"
 }

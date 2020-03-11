@@ -1,8 +1,12 @@
 using System;
+using UnityEngine.Experimental.Rendering;
 
-namespace UnityEngine.Rendering.LWRP
+namespace UnityEngine.Rendering.Universal.Internal
 {
-    internal class ScreenSpaceShadowResolvePass : ScriptableRenderPass
+    /// <summary>
+    /// Resolves shadows in a screen space texture.
+    /// </summary>
+    public class ScreenSpaceShadowResolvePass : ScriptableRenderPass
     {
         Material m_ScreenSpaceShadowsMaterial;
         RenderTargetHandle m_ScreenSpaceShadowmap;
@@ -21,9 +25,9 @@ namespace UnityEngine.Rendering.LWRP
             m_RenderTextureDescriptor = baseDescriptor;
             m_RenderTextureDescriptor.depthBufferBits = 0;
             m_RenderTextureDescriptor.msaaSamples = 1;
-            m_RenderTextureDescriptor.colorFormat = RenderingUtils.SupportsRenderTextureFormat(RenderTextureFormat.R8)
-                ? RenderTextureFormat.R8
-                : RenderTextureFormat.ARGB32;
+            m_RenderTextureDescriptor.graphicsFormat = RenderingUtils.SupportsGraphicsFormat(GraphicsFormat.R8_UNorm, FormatUsage.Linear | FormatUsage.Render)
+                ? GraphicsFormat.R8_UNorm
+                : GraphicsFormat.B8G8R8A8_UNorm;
         }
 
         public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)

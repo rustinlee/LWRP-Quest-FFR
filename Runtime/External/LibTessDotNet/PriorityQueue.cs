@@ -35,14 +35,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace UnityEngine.Experimental.Rendering.LWRP
+namespace UnityEngine.Experimental.Rendering.Universal
 {
 
-#if DOUBLE
-namespace LibTessDotNet.Double
-#else
 namespace LibTessDotNet
-#endif
 {
     internal class PriorityQueue<TValue> where TValue : class
     {

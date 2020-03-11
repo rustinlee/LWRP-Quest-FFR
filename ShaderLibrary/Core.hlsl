@@ -1,10 +1,10 @@
-#ifndef LIGHTWEIGHT_PIPELINE_CORE_INCLUDED
-#define LIGHTWEIGHT_PIPELINE_CORE_INCLUDED
+#ifndef UNIVERSAL_PIPELINE_CORE_INCLUDED
+#define UNIVERSAL_PIPELINE_CORE_INCLUDED
 
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Packing.hlsl"
-#include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Version.hlsl"
-#include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Input.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Version.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
 
 #if !defined(SHADER_HINT_NICE_QUALITY)
 #if defined(SHADER_API_MOBILE) || defined(SHADER_API_SWITCH)
@@ -14,7 +14,7 @@
 #endif
 #endif
 
-// Shader Quality Tiers in LWRP. 
+// Shader Quality Tiers in Universal. 
 // SRP doesn't use Graphics Settings Quality Tiers.
 // We should expose shader quality tiers in the pipeline asset.
 // Meanwhile, it's forced to be:
@@ -117,23 +117,9 @@ void AlphaDiscard(real alpha, real cutoff, real offset = 0.0h)
 #endif
 }
 
-real3 UnpackNormal(real4 packedNormal)
+half OutputAlpha(half outputAlpha)
 {
-#if defined(UNITY_NO_DXT5nm)
-    return UnpackNormalRGBNoScale(packedNormal);
-#else
-        // Compiler will optimize the scale away
-    return UnpackNormalmapRGorAG(packedNormal, 1.0);
-#endif
-}
-
-real3 UnpackNormalScale(real4 packedNormal, real bumpScale)
-{
-#if defined(UNITY_NO_DXT5nm)
-    return UnpackNormalRGB(packedNormal, bumpScale);
-#else
-    return UnpackNormalmapRGorAG(packedNormal, bumpScale);
-#endif
+    return saturate(outputAlpha + _DrawObjectPassData.a);
 }
 
 // A word on normalization of normals:
@@ -191,21 +177,31 @@ real ComputeFogFactor(float z)
 #endif
 }
 
-half3 MixFogColor(real3 fragColor, real3 fogColor, real fogFactor)
+real ComputeFogIntensity(real fogFactor)
 {
+    real fogIntensity = 0.0h;
 #if defined(FOG_LINEAR) || defined(FOG_EXP) || defined(FOG_EXP2)
 #if defined(FOG_EXP)
     // factor = exp(-density*z)
     // fogFactor = density*z compute at vertex
-    fogFactor = saturate(exp2(-fogFactor));
+    fogIntensity = saturate(exp2(-fogFactor));
 #elif defined(FOG_EXP2)
     // factor = exp(-(density*z)^2)
     // fogFactor = density*z compute at vertex
-    fogFactor = saturate(exp2(-fogFactor*fogFactor));
+    fogIntensity = saturate(exp2(-fogFactor * fogFactor));
+#elif defined(FOG_LINEAR)
+    fogIntensity = fogFactor;
 #endif
-    fragColor = lerp(fogColor, fragColor, fogFactor);
 #endif
+    return fogIntensity;
+}
 
+half3 MixFogColor(real3 fragColor, real3 fogColor, real fogFactor)
+{
+#if defined(FOG_LINEAR) || defined(FOG_EXP) || defined(FOG_EXP2)
+    real fogIntensity = ComputeFogIntensity(fogFactor);
+    fragColor = lerp(fogColor, fragColor, fogIntensity);
+#endif
     return fragColor;
 }
 
@@ -216,19 +212,49 @@ half3 MixFog(real3 fragColor, real fogFactor)
 
 // Stereo-related bits
 #if defined(UNITY_STEREO_INSTANCING_ENABLED) || defined(UNITY_STEREO_MULTIVIEW_ENABLED)
-    #define SCREENSPACE_TEXTURE         TEXTURE2D_ARRAY
-    #define SCREENSPACE_TEXTURE_FLOAT   TEXTURE2D_ARRAY_FLOAT
-    #define SCREENSPACE_TEXTURE_HALF    TEXTURE2D_ARRAY_HALF
+
+    #define SLICE_ARRAY_INDEX   unity_StereoEyeIndex
+
+    #define TEXTURE2D_X                 TEXTURE2D_ARRAY
+    #define TEXTURE2D_X_PARAM           TEXTURE2D_ARRAY_PARAM
+    #define TEXTURE2D_X_ARGS            TEXTURE2D_ARRAY_ARGS
+    #define TEXTURE2D_X_HALF            TEXTURE2D_ARRAY_HALF
+    #define TEXTURE2D_X_FLOAT           TEXTURE2D_ARRAY_FLOAT
+
+    #define LOAD_TEXTURE2D_X(textureName, unCoord2)                         LOAD_TEXTURE2D_ARRAY(textureName, unCoord2, SLICE_ARRAY_INDEX)
+    #define LOAD_TEXTURE2D_X_LOD(textureName, unCoord2, lod)                LOAD_TEXTURE2D_ARRAY_LOD(textureName, unCoord2, SLICE_ARRAY_INDEX, lod)    
+    #define SAMPLE_TEXTURE2D_X(textureName, samplerName, coord2)            SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, SLICE_ARRAY_INDEX)
+    #define SAMPLE_TEXTURE2D_X_LOD(textureName, samplerName, coord2, lod)   SAMPLE_TEXTURE2D_ARRAY_LOD(textureName, samplerName, coord2, SLICE_ARRAY_INDEX, lod)
+    #define GATHER_TEXTURE2D_X(textureName, samplerName, coord2)            GATHER_TEXTURE2D_ARRAY(textureName, samplerName, coord2, SLICE_ARRAY_INDEX)
+    #define GATHER_RED_TEXTURE2D_X(textureName, samplerName, coord2)        GATHER_RED_TEXTURE2D(textureName, samplerName, float3(coord2, SLICE_ARRAY_INDEX))
+    #define GATHER_GREEN_TEXTURE2D_X(textureName, samplerName, coord2)      GATHER_GREEN_TEXTURE2D(textureName, samplerName, float3(coord2, SLICE_ARRAY_INDEX))
+    #define GATHER_BLUE_TEXTURE2D_X(textureName, samplerName, coord2)       GATHER_BLUE_TEXTURE2D(textureName, samplerName, float3(coord2, SLICE_ARRAY_INDEX))
+
 #else
-    #define SCREENSPACE_TEXTURE         TEXTURE2D
-    #define SCREENSPACE_TEXTURE_FLOAT   TEXTURE2D_FLOAT
-    #define SCREENSPACE_TEXTURE_HALF    TEXTURE2D_HALF
+
+    #define SLICE_ARRAY_INDEX       0
+
+    #define TEXTURE2D_X                 TEXTURE2D
+    #define TEXTURE2D_X_PARAM           TEXTURE2D_PARAM
+    #define TEXTURE2D_X_ARGS            TEXTURE2D_ARGS
+    #define TEXTURE2D_X_HALF            TEXTURE2D_HALF
+    #define TEXTURE2D_X_FLOAT           TEXTURE2D_FLOAT
+
+    #define LOAD_TEXTURE2D_X            LOAD_TEXTURE2D
+    #define LOAD_TEXTURE2D_X_LOD        LOAD_TEXTURE2D_LOD
+    #define SAMPLE_TEXTURE2D_X          SAMPLE_TEXTURE2D
+    #define SAMPLE_TEXTURE2D_X_LOD      SAMPLE_TEXTURE2D_LOD
+    #define GATHER_TEXTURE2D_X          GATHER_TEXTURE2D
+    #define GATHER_RED_TEXTURE2D_X      GATHER_RED_TEXTURE2D
+    #define GATHER_GREEN_TEXTURE2D_X    GATHER_GREEN_TEXTURE2D
+    #define GATHER_BLUE_TEXTURE2D_X     GATHER_BLUE_TEXTURE2D
+
 #endif
 
 #if defined(UNITY_SINGLE_PASS_STEREO)
 float2 TransformStereoScreenSpaceTex(float2 uv, float w)
 {
-    // TODO: RVS support can be added here, if LWRP decides to support it
+    // TODO: RVS support can be added here, if Universal decides to support it
     float4 scaleOffset = unity_StereoScaleOffset[unity_StereoEyeIndex];
     return uv.xy * scaleOffset.xy + scaleOffset.zw * w;
 }
@@ -237,10 +263,13 @@ float2 UnityStereoTransformScreenSpaceTex(float2 uv)
 {
     return TransformStereoScreenSpaceTex(saturate(uv), 1.0);
 }
+
 #else
 
 #define UnityStereoTransformScreenSpaceTex(uv) uv
 
 #endif // defined(UNITY_SINGLE_PASS_STEREO)
+
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Deprecated.hlsl"
 
 #endif

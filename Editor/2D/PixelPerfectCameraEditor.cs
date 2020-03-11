@@ -1,8 +1,8 @@
 using System;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering.LWRP;
+using UnityEngine.Experimental.Rendering.Universal;
 
-namespace UnityEditor.Experimental.Rendering.LWRP
+namespace UnityEditor.Experimental.Rendering.Universal
 {
     [CustomEditor(typeof(PixelPerfectCamera))]
     class PixelPerfectCameraEditor : Editor
@@ -167,7 +167,7 @@ namespace UnityEditor.Experimental.Rendering.LWRP
                 if (obj.isActiveAndEnabled && (EditorApplication.isPlaying || obj.runInEditMode))
                 {
                     if (Event.current.type == EventType.Layout)
-                        m_CurrentPixelRatioValue.text = String.Format("{0}:1", obj.pixelRatio);
+                        m_CurrentPixelRatioValue.text = string.Format("{0}:1", obj.pixelRatio);
 
                     EditorGUI.BeginDisabledGroup(true);
                     EditorGUILayout.LabelField(m_Style.currentPixelRatio, m_CurrentPixelRatioValue);

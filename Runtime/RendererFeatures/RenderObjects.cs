@@ -1,16 +1,17 @@
 using System.Collections.Generic;
-using UnityEngine.Rendering.LWRP;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.Rendering;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace UnityEngine.Experimental.Rendering.LWRP
+namespace UnityEngine.Experimental.Rendering.Universal
 {
-    public enum RenderQueueType
+    [MovedFrom("UnityEngine.Experimental.Rendering.LWRP")]public enum RenderQueueType
     {
         Opaque,
         Transparent,
     }
 
-    public class RenderObjects : ScriptableRendererFeature
+    [MovedFrom("UnityEngine.Experimental.Rendering.LWRP")]public class RenderObjects : ScriptableRendererFeature
     {
         [System.Serializable]
         public class RenderObjectsSettings
@@ -31,7 +32,7 @@ namespace UnityEngine.Experimental.Rendering.LWRP
 
             public CustomCameraSettings cameraSettings = new CustomCameraSettings();
         }
-        
+
         [System.Serializable]
         public class FilterSettings
         {

@@ -1,4 +1,7 @@
-namespace UnityEngine.Experimental.Rendering.LWRP
+using System;
+using UnityEngine.Scripting.APIUpdating;
+
+namespace UnityEngine.Experimental.Rendering.Universal
 {
     sealed public partial class Light2D : MonoBehaviour
     {
@@ -43,7 +46,7 @@ namespace UnityEngine.Experimental.Rendering.LWRP
 
         public float pointLightDistance => m_PointLightDistance;
         public PointLightQuality pointLightQuality => m_PointLightQuality;
-        
+
         private BoundingSphere GetPointLightBoundingSphere()
         {
             BoundingSphere boundingSphere;

@@ -1,4 +1,4 @@
-namespace UnityEngine.Rendering.LWRP
+namespace UnityEngine.Rendering.Universal.Internal
 {
     /// <summary>
     /// Copy the given color target to the current camera target
@@ -7,15 +7,12 @@ namespace UnityEngine.Rendering.LWRP
     /// the camera target. The pass takes the screen viewport into
     /// consideration.
     /// </summary>
-    internal class FinalBlitPass : ScriptableRenderPass
+    public class FinalBlitPass : ScriptableRenderPass
     {
         const string m_ProfilerTag = "Final Blit Pass";
         RenderTargetHandle m_Source;
         Material m_BlitMaterial;
         TextureDimension m_TargetDimension;
-        bool m_ClearBlitTarget;
-        bool m_IsMobileOrSwitch;
-        Rect m_PixelRect;
 
         public FinalBlitPass(RenderPassEvent evt, Material blitMaterial)
         {
@@ -28,15 +25,10 @@ namespace UnityEngine.Rendering.LWRP
         /// </summary>
         /// <param name="baseDescriptor"></param>
         /// <param name="colorHandle"></param>
-        /// <param name="clearBlitTarget"></param>
-        /// <param name="pixelRect"></param>
-        public void Setup(RenderTextureDescriptor baseDescriptor, RenderTargetHandle colorHandle, bool clearBlitTarget = false, Rect pixelRect = new Rect())
+        public void Setup(RenderTextureDescriptor baseDescriptor, RenderTargetHandle colorHandle)
         {
             m_Source = colorHandle;
             m_TargetDimension = baseDescriptor.dimension;
-            m_ClearBlitTarget = clearBlitTarget;
-            m_IsMobileOrSwitch = Application.isMobilePlatform || Application.platform == RuntimePlatform.Switch;
-            m_PixelRect = pixelRect;
         }
 
         /// <inheritdoc/>
@@ -48,9 +40,19 @@ namespace UnityEngine.Rendering.LWRP
                 return;
             }
 
-            bool requiresSRGBConvertion = Display.main.requiresSrgbBlitToBackbuffer;
-            bool killAlpha = renderingData.killAlphaInFinalBlit;
+            // Note: We need to get the cameraData.targetTexture as this will get the targetTexture of the camera stack.
+            // Overlay cameras need to output to the target described in the base camera while doing camera stack.
+            ref CameraData cameraData = ref renderingData.cameraData;
+            RenderTargetIdentifier cameraTarget = (cameraData.targetTexture != null) ? new RenderTargetIdentifier(cameraData.targetTexture) : BuiltinRenderTextureType.CameraTarget;
 
+            bool requiresSRGBConvertion = Display.main.requiresSrgbBlitToBackbuffer;
+
+            // For stereo case, eye texture always want color data in sRGB space.
+            // If eye texture color format is linear, we do explicit sRGB convertion
+#if ENABLE_VR && ENABLE_VR_MODULE
+            if (cameraData.isStereoEnabled)
+                requiresSRGBConvertion = !XRGraphics.eyeTextureDesc.sRGB;
+#endif
             CommandBuffer cmd = CommandBufferPool.Get(m_ProfilerTag);
 
             if (requiresSRGBConvertion)
@@ -58,12 +60,6 @@ namespace UnityEngine.Rendering.LWRP
             else
                 cmd.DisableShaderKeyword(ShaderKeywordStrings.LinearToSRGBConversion);
 
-            if (killAlpha)
-                cmd.EnableShaderKeyword(ShaderKeywordStrings.KillAlpha);
-            else
-                cmd.DisableShaderKeyword(ShaderKeywordStrings.KillAlpha);
-
-            ref CameraData cameraData = ref renderingData.cameraData;
             // Use default blit for XR as we are not sure the UniversalRP blit handles stereo.
             // The blit will be reworked for stereo along the XRSDK work.
             Material blitMaterial = (cameraData.isStereoEnabled) ? null : m_BlitMaterial;
@@ -71,8 +67,10 @@ namespace UnityEngine.Rendering.LWRP
             if (cameraData.isStereoEnabled || cameraData.isSceneViewCamera || cameraData.isDefaultViewport)
             {
                 // This set render target is necessary so we change the LOAD state to DontCare.
-                cmd.SetRenderTarget(BuiltinRenderTextureType.CameraTarget, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
-                cmd.Blit(m_Source.Identifier(), BuiltinRenderTextureType.CameraTarget, blitMaterial);
+                cmd.SetRenderTarget(BuiltinRenderTextureType.CameraTarget,
+                    RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store,     // color
+                    RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare); // depth
+                cmd.Blit(m_Source.Identifier(), cameraTarget, blitMaterial);
             }
             else
             {
@@ -81,16 +79,16 @@ namespace UnityEngine.Rendering.LWRP
                 // meanwhile we set to load so split screen case works.
                 SetRenderTarget(
                     cmd,
-                    BuiltinRenderTextureType.CameraTarget,
-                    m_ClearBlitTarget ? RenderBufferLoadAction.DontCare : RenderBufferLoadAction.Load,
+                    cameraTarget,
+                    RenderBufferLoadAction.Load,
                     RenderBufferStoreAction.Store,
-                    m_ClearBlitTarget ? ClearFlag.Color : ClearFlag.None,
+                    ClearFlag.None,
                     Color.black,
                     m_TargetDimension);
 
                 Camera camera = cameraData.camera;
                 cmd.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.identity);
-                cmd.SetViewport(m_PixelRect != Rect.zero ? m_PixelRect : cameraData.camera.pixelRect);
+                cmd.SetViewport(cameraData.pixelRect);
                 cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, blitMaterial);
                 cmd.SetViewProjectionMatrices(camera.worldToCameraMatrix, camera.projectionMatrix);
             }

@@ -1,9 +1,10 @@
 using System;
 using System.Linq;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace UnityEngine.Rendering.LWRP
+namespace UnityEngine.Rendering.Universal
 {
-    public enum ShaderPathID
+    [MovedFrom("UnityEngine.Rendering.LWRP")] public enum ShaderPathID
     {
         Lit,
         SimpleLit,
@@ -16,18 +17,18 @@ namespace UnityEngine.Rendering.LWRP
         Count
     }
 
-    public static class ShaderUtils
+    [MovedFrom("UnityEngine.Rendering.LWRP")] public static class ShaderUtils
     {
         static readonly string[] s_ShaderPaths  =
         {
-            "Lightweight Render Pipeline/Lit",
-            "Lightweight Render Pipeline/Simple Lit",
-            "Lightweight Render Pipeline/Unlit",
-            "Lightweight Render Pipeline/Terrain/Lit",
-            "Lightweight Render Pipeline/Particles/Lit",
-            "Lightweight Render Pipeline/Particles/Simple Lit",
-            "Lightweight Render Pipeline/Particles/Unlit",
-            "Lightweight Render Pipeline/Baked Lit",
+            "Universal Render Pipeline/Lit",
+            "Universal Render Pipeline/Simple Lit",
+            "Universal Render Pipeline/Unlit",
+            "Universal Render Pipeline/Terrain/Lit",
+            "Universal Render Pipeline/Particles/Lit",
+            "Universal Render Pipeline/Particles/Simple Lit",
+            "Universal Render Pipeline/Particles/Unlit",
+            "Universal Render Pipeline/Baked Lit",
         };
 
         public static string GetShaderPath(ShaderPathID id)
@@ -35,13 +36,13 @@ namespace UnityEngine.Rendering.LWRP
             int index = (int)id;
             if (index < 0 && index >= (int)ShaderPathID.Count)
             {
-                Debug.LogError("Trying to access lightweight shader path out of bounds");
+                Debug.LogError("Trying to access universal shader path out of bounds");
                 return "";
             }
 
             return s_ShaderPaths[index];
         }
-        
+
         public static ShaderPathID GetEnumFromPath(string path)
         {
             var index = Array.FindIndex(s_ShaderPaths, m => m == path);

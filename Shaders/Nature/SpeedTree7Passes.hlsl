@@ -1,7 +1,7 @@
-#ifndef LIGHTWEIGHT_SPEEDTREE7_PASSES_INCLUDED
-#define LIGHTWEIGHT_SPEEDTREE7_PASSES_INCLUDED
+#ifndef UNIVERSAL_SPEEDTREE7_PASSES_INCLUDED
+#define UNIVERSAL_SPEEDTREE7_PASSES_INCLUDED
 
-#include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Lighting.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "SpeedTree7CommonPasses.hlsl"
 
 void InitializeData(inout SpeedTreeVertexInput input, float lodValue)
@@ -134,7 +134,7 @@ SpeedTreeVertexOutput SpeedTree7Vert(SpeedTreeVertexInput input)
     output.fogFactorAndVertexLight = half4(fogFactor, vertexLight);
 
     half3 viewDirWS = GetCameraPositionWS() - vertexInput.positionWS;
-    
+
     #ifdef EFFECT_BUMP
         real sign = input.tangent.w * GetOddNegativeScale();
         output.normalWS.xyz = normalWS;
@@ -150,7 +150,7 @@ SpeedTreeVertexOutput SpeedTree7Vert(SpeedTreeVertexInput input)
         output.viewDirWS = viewDirWS;
     #endif
 
-    #ifdef _MAIN_LIGHT_SHADOWS
+    #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
         output.shadowCoord = GetShadowCoord(vertexInput);
     #endif
 

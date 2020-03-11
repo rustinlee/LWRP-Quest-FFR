@@ -34,16 +34,11 @@
 using System;
 using System.Diagnostics;
 
-namespace UnityEngine.Experimental.Rendering.LWRP
+namespace UnityEngine.Experimental.Rendering.Universal
 {
 
-#if DOUBLE
-using Real = System.Double;
-namespace LibTessDotNet.Double
-#else
 using Real = System.Single;
 namespace LibTessDotNet
-#endif
 {
     internal partial class Tess
     {

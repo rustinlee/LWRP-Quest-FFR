@@ -1,4 +1,4 @@
-Shader "Lightweight Render Pipeline/Nature/SpeedTree7 Billboard"
+Shader "Universal Render Pipeline/Nature/SpeedTree7 Billboard"
 {
     Properties
     {
@@ -18,14 +18,14 @@ Shader "Lightweight Render Pipeline/Nature/SpeedTree7 Billboard"
             "IgnoreProjector" = "True"
             "RenderType" = "TransparentCutout"
             "DisableBatching" = "LODFading"
-            "RenderPipeline" = "LightweightPipeline"
+            "RenderPipeline" = "UniversalPipeline"
         }
         LOD 400
 
         Pass
         {
             Name "ForwardLit"
-            Tags { "LightMode" = "LightweightForward" }
+            Tags { "LightMode" = "UniversalForward" }
 
             HLSLPROGRAM
 
@@ -95,7 +95,7 @@ Shader "Lightweight Render Pipeline/Nature/SpeedTree7 Billboard"
 
             #include "SpeedTree7BillboardInput.hlsl"
             #include "SpeedTree7BillboardPasses.hlsl"
-            
+
             ENDHLSL
         }
     }

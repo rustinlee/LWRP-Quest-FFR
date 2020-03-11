@@ -1,19 +1,26 @@
-Shader "Lightweight Render Pipeline/2D/Sprite-Lit-Default"
+Shader "Universal Render Pipeline/2D/Sprite-Lit-Default"
 {
     Properties
     {
         _MainTex("Diffuse", 2D) = "white" {}
         _MaskTex("Mask", 2D) = "white" {}
         _NormalMap("Normal Map", 2D) = "bump" {}
+
+        // Legacy properties. They're here so that materials using this shader can gracefully fallback to the legacy sprite shader.
+        [HideInInspector] _Color("Tint", Color) = (1,1,1,1)
+        [HideInInspector] _RendererColor("RendererColor", Color) = (1,1,1,1)
+        [HideInInspector] _Flip("Flip", Vector) = (1,1,1,1)
+        [HideInInspector] _AlphaTex("External Alpha", 2D) = "white" {}
+        [HideInInspector] _EnableExternalAlpha("Enable External Alpha", Float) = 0
     }
 
     HLSLINCLUDE
-    #include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Core.hlsl"
+    #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
     ENDHLSL
 
     SubShader
     {
-        Tags {"Queue" = "Transparent" "RenderType" = "Transparent" "RenderPipeline" = "LightweightPipeline" }
+        Tags {"Queue" = "Transparent" "RenderType" = "Transparent" "RenderPipeline" = "UniversalPipeline" }
 
         Blend SrcAlpha OneMinusSrcAlpha
         Cull Off
@@ -21,7 +28,7 @@ Shader "Lightweight Render Pipeline/2D/Sprite-Lit-Default"
 
         Pass
         {
-            Tags { "LightMode" = "Lightweight2D" }
+            Tags { "LightMode" = "Universal2D" }
             HLSLPROGRAM
             #pragma prefer_hlslcc gles
             #pragma vertex CombinedShapeLightVertex
@@ -46,7 +53,7 @@ Shader "Lightweight Render Pipeline/2D/Sprite-Lit-Default"
                 float2	lightingUV  : TEXCOORD1;
             };
 
-            #include "Packages/com.unity.render-pipelines.lightweight/Shaders/2D/Include/LightingUtility.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/LightingUtility.hlsl"
 
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
@@ -81,16 +88,11 @@ Shader "Lightweight Render Pipeline/2D/Sprite-Lit-Default"
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 float4 clipVertex = o.positionCS / o.positionCS.w;
                 o.lightingUV = ComputeScreenPos(clipVertex).xy;
-
-                #if UNITY_UV_STARTS_AT_TOP
-                o.lightingUV.y = 1.0 - o.lightingUV.y;
-                #endif
-
                 o.color = v.color;
                 return o;
             }
 
-            #include "Packages/com.unity.render-pipelines.lightweight/Shaders/2D/Include/CombinedShapeLightShared.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/CombinedShapeLightShared.hlsl"
 
             half4 CombinedShapeLightFragment(Varyings i) : SV_Target
             {
@@ -115,6 +117,7 @@ Shader "Lightweight Render Pipeline/2D/Sprite-Lit-Default"
                 float3 positionOS   : POSITION;
                 float4 color		: COLOR;
                 float2 uv			: TEXCOORD0;
+                float4 tangent      : TANGENT;
             };
 
             struct Varyings
@@ -138,31 +141,28 @@ Shader "Lightweight Render Pipeline/2D/Sprite-Lit-Default"
                 Varyings o = (Varyings)0;
 
                 o.positionCS = TransformObjectToHClip(attributes.positionOS);
-                #if UNITY_UV_STARTS_AT_TOP
-                    o.positionCS.y = -o.positionCS.y;
-                #endif
                 o.uv = TRANSFORM_TEX(attributes.uv, _NormalMap);
                 o.uv = attributes.uv;
                 o.color = attributes.color;
-                o.normalWS = TransformObjectToWorldDir(float3(0, 0, 1));
-                o.tangentWS = TransformObjectToWorldDir(float3(1, 0, 0));
-                o.bitangentWS = TransformObjectToWorldDir(float3(0, 1, 0));
+                o.normalWS = TransformObjectToWorldDir(float3(0, 0, -1));
+                o.tangentWS = TransformObjectToWorldDir(attributes.tangent.xyz);
+                o.bitangentWS = cross(o.normalWS, o.tangentWS) * attributes.tangent.w;
                 return o;
             }
 
-            #include "Packages/com.unity.render-pipelines.lightweight/Shaders/2D/Include/NormalsRenderingShared.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/NormalsRenderingShared.hlsl"
 
             float4 NormalsRenderingFragment(Varyings i) : SV_Target
             {
                 float4 mainTex = i.color * SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv);
                 float3 normalTS = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, i.uv));
-                return NormalsRenderingShared(mainTex, normalTS, i.tangentWS.xyz, i.bitangentWS.xyz, -i.normalWS.xyz);
+                return NormalsRenderingShared(mainTex, normalTS, i.tangentWS.xyz, i.bitangentWS.xyz, i.normalWS.xyz);
             }
             ENDHLSL
         }
         Pass
         {
-            Tags { "LightMode" = "LightweightForward" "Queue"="Transparent" "RenderType"="Transparent"}
+            Tags { "LightMode" = "UniversalForward" "Queue"="Transparent" "RenderType"="Transparent"}
 
             HLSLPROGRAM
             #pragma prefer_hlslcc gles
@@ -206,5 +206,6 @@ Shader "Lightweight Render Pipeline/2D/Sprite-Lit-Default"
             ENDHLSL
         }
     }
-    Fallback "Hidden/Sprite-Fallback"
+
+    Fallback "Sprites/Default"
 }

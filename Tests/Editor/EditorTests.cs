@@ -1,9 +1,9 @@
 using NUnit.Framework;
 using UnityEditor;
-using UnityEditor.Rendering.LWRP;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.Rendering.LWRP;
+using UnityEngine.Rendering.Universal;
+using UnityEditor.Rendering.Universal.Internal;
 using UnityEngine.TestTools;
 
 class EditorTests
@@ -18,9 +18,11 @@ class EditorTests
 
         try
         {
-            LightweightRenderPipelineAsset asset = LightweightRenderPipelineAsset.Create();
+            ForwardRendererData data = ScriptableObject.CreateInstance<ForwardRendererData>();
+            UniversalRenderPipelineAsset asset = UniversalRenderPipelineAsset.Create(data);
             LogAssert.NoUnexpectedReceived();
             ScriptableObject.DestroyImmediate(asset);
+            ScriptableObject.DestroyImmediate(data);
         }
         // Makes sure the render pipeline is restored in case of a NullReference exception.
         finally
@@ -40,7 +42,7 @@ class EditorTests
         try
         {
             var asset = ScriptableObject.CreateInstance<ForwardRendererData>();
-            ResourceReloader.ReloadAllNullIn(asset, LightweightRenderPipelineAsset.packagePath);
+            ResourceReloader.ReloadAllNullIn(asset, UniversalRenderPipelineAsset.packagePath);
             LogAssert.NoUnexpectedReceived();
             ScriptableObject.DestroyImmediate(asset);
         }
@@ -63,7 +65,8 @@ class EditorTests
     [Test]
     public void ValidateNewAssetResources()
     {
-        LightweightRenderPipelineAsset asset = LightweightRenderPipelineAsset.Create();
+        ForwardRendererData data = ScriptableObject.CreateInstance<ForwardRendererData>();
+        UniversalRenderPipelineAsset asset = UniversalRenderPipelineAsset.Create(data);
         Assert.AreNotEqual(null, asset.defaultMaterial);
         Assert.AreNotEqual(null, asset.defaultParticleMaterial);
         Assert.AreNotEqual(null, asset.defaultLineMaterial);
@@ -77,8 +80,9 @@ class EditorTests
         Assert.AreEqual(null, asset.default2DMaterial);
 
         Assert.AreNotEqual(null, asset.m_EditorResourcesAsset, "Editor Resources should be initialized when creating a new pipeline.");
-        Assert.AreNotEqual(null, asset.m_RendererData, "A default renderer data should be created when creating a new pipeline.");
+        Assert.AreNotEqual(null, asset.m_RendererDataList, "A default renderer data should be created when creating a new pipeline.");
         ScriptableObject.DestroyImmediate(asset);
+        ScriptableObject.DestroyImmediate(data);
     }
 
     // When changing LWRP settings, all settings should be valid.
@@ -86,36 +90,38 @@ class EditorTests
     public void ValidateAssetSettings()
     {
         // Create a new asset and validate invalid settings
-        LightweightRenderPipelineAsset asset = LightweightRenderPipelineAsset.Create();
+        ForwardRendererData data = ScriptableObject.CreateInstance<ForwardRendererData>();
+        UniversalRenderPipelineAsset asset = UniversalRenderPipelineAsset.Create(data);
         if (asset != null)
         {
             asset.shadowDistance = -1.0f;
             Assert.GreaterOrEqual(asset.shadowDistance, 0.0f);
 
             asset.renderScale = -1.0f;
-            Assert.GreaterOrEqual(asset.renderScale, LightweightRenderPipeline.minRenderScale);
+            Assert.GreaterOrEqual(asset.renderScale, UniversalRenderPipeline.minRenderScale);
 
             asset.renderScale = 32.0f;
-            Assert.LessOrEqual(asset.renderScale, LightweightRenderPipeline.maxRenderScale);
+            Assert.LessOrEqual(asset.renderScale, UniversalRenderPipeline.maxRenderScale);
 
             asset.shadowNormalBias = -1.0f;
             Assert.GreaterOrEqual(asset.shadowNormalBias, 0.0f);
 
             asset.shadowNormalBias = 32.0f;
-            Assert.LessOrEqual(asset.shadowNormalBias, LightweightRenderPipeline.maxShadowBias);
+            Assert.LessOrEqual(asset.shadowNormalBias, UniversalRenderPipeline.maxShadowBias);
 
             asset.shadowDepthBias = -1.0f;
             Assert.GreaterOrEqual(asset.shadowDepthBias, 0.0f);
 
             asset.shadowDepthBias = 32.0f;
-            Assert.LessOrEqual(asset.shadowDepthBias, LightweightRenderPipeline.maxShadowBias);
+            Assert.LessOrEqual(asset.shadowDepthBias, UniversalRenderPipeline.maxShadowBias);
 
             asset.maxAdditionalLightsCount = -1;
             Assert.GreaterOrEqual(asset.maxAdditionalLightsCount, 0);
 
             asset.maxAdditionalLightsCount = 32;
-            Assert.LessOrEqual(asset.maxAdditionalLightsCount, LightweightRenderPipeline.maxPerObjectLights);
+            Assert.LessOrEqual(asset.maxAdditionalLightsCount, UniversalRenderPipeline.maxPerObjectLights);
         }
         ScriptableObject.DestroyImmediate(asset);
+        ScriptableObject.DestroyImmediate(data);
     }
 }

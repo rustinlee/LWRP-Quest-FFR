@@ -1,8 +1,9 @@
 using System;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace UnityEngine.Rendering.LWRP
+namespace UnityEngine.Rendering.Universal
 {
-    public struct ShadowSliceData
+    [MovedFrom("UnityEngine.Rendering.LWRP")] public struct ShadowSliceData
     {
         public Matrix4x4 viewMatrix;
         public Matrix4x4 projectionMatrix;
@@ -21,7 +22,7 @@ namespace UnityEngine.Rendering.LWRP
         }
     }
 
-    public static class ShadowUtils
+    [MovedFrom("UnityEngine.Rendering.LWRP")] public static class ShadowUtils
     {
         private static readonly RenderTextureFormat m_ShadowmapFormat;
         private static readonly bool m_ForceShadowPointSampling;
@@ -82,6 +83,13 @@ namespace UnityEngine.Rendering.LWRP
             cmd.Clear();
         }
 
+        public static void RenderShadowSlice(CommandBuffer cmd, ref ScriptableRenderContext context,
+            ref ShadowSliceData shadowSliceData, ref ShadowDrawingSettings settings)
+        {
+            RenderShadowSlice(cmd, ref context, ref shadowSliceData, ref settings,
+                shadowSliceData.projectionMatrix, shadowSliceData.viewMatrix);
+        }
+
         public static int GetMaxTileResolutionInAtlas(int atlasWidth, int atlasHeight, int tileCount)
         {
             int resolution = Mathf.Min(atlasWidth, atlasHeight);
@@ -125,7 +133,7 @@ namespace UnityEngine.Rendering.LWRP
             else if (shadowLight.lightType == LightType.Spot)
             {
                 // For perspective projections, shadow texel size varies with depth
-                // It will only work well if done in receiver side in the pixel shader. Currently LWRP
+                // It will only work well if done in receiver side in the pixel shader. Currently UniversalRP
                 // do bias on caster side in vertex shader. When we add shader quality tiers we can properly
                 // handle this. For now, as a poor approximation we do a constant bias and compute the size of
                 // the frustum as if it was orthogonal considering the size at mid point between near and far planes.
@@ -134,7 +142,7 @@ namespace UnityEngine.Rendering.LWRP
             }
             else
             {
-                Debug.LogWarning("Only spot and directional shadow casters are supported in lightweight pipeline");
+                Debug.LogWarning("Only spot and directional shadow casters are supported in universal pipeline");
                 frustumSize = 0.0f;
             }
 
@@ -142,7 +150,7 @@ namespace UnityEngine.Rendering.LWRP
             float texelSize = frustumSize / shadowResolution;
             float depthBias = -shadowData.bias[shadowLightIndex].x * texelSize;
             float normalBias = -shadowData.bias[shadowLightIndex].y * texelSize;
-            
+
             if (shadowData.supportsSoftShadows)
             {
                 // TODO: depth and normal bias assume sample is no more than 1 texel away from shadowmap

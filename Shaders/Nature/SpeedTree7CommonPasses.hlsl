@@ -1,7 +1,7 @@
-#ifndef LIGHTWEIGHT_SPEEDTREE7COMMON_PASSES_INCLUDED
-#define LIGHTWEIGHT_SPEEDTREE7COMMON_PASSES_INCLUDED
+#ifndef UNIVERSAL_SPEEDTREE7COMMON_PASSES_INCLUDED
+#define UNIVERSAL_SPEEDTREE7COMMON_PASSES_INCLUDED
 
-#include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Lighting.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
 struct SpeedTreeVertexInput
 {
@@ -67,16 +67,18 @@ void InitializeInputData(SpeedTreeVertexOutput input, half3 normalTS, out InputD
         inputData.normalWS = NormalizeNormalPerPixel(inputData.normalWS);
         inputData.viewDirectionWS = half3(input.normalWS.w, input.tangentWS.w, input.bitangentWS.w);
     #else
-        inputData.normalWS = input.normalWS;
+        inputData.normalWS = NormalizeNormalPerPixel(input.normalWS);
         inputData.viewDirectionWS = input.viewDirWS;
     #endif
 
     #if SHADER_HINT_NICE_QUALITY
         inputData.viewDirectionWS = SafeNormalize(inputData.viewDirectionWS);
     #endif
-    
-    #ifdef _MAIN_LIGHT_SHADOWS
+
+    #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
         inputData.shadowCoord = input.shadowCoord;
+    #elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+        inputData.shadowCoord = TransformWorldToShadowCoord(inputData.positionWS);
     #else
         inputData.shadowCoord = float4(0, 0, 0, 0);
     #endif
@@ -92,7 +94,7 @@ half4 SpeedTree7Frag(SpeedTreeVertexOutput input) : SV_Target
 
 #if !defined(SHADER_QUALITY_LOW)
     #ifdef LOD_FADE_CROSSFADE // enable dithering LOD transition if user select CrossFade transition in LOD group
-        LODDitheringTransition(input.clipPos.xyz, unity_LODFade.x);
+        LODDitheringTransition(input.clipPos.xy, unity_LODFade.x);
     #endif
 #endif
 
@@ -141,8 +143,9 @@ half4 SpeedTree7Frag(SpeedTreeVertexOutput input) : SV_Target
         diffuseColor.rgb *= _Color.rgb;
     #endif
 
-    half4 color = LightweightFragmentBlinnPhong(inputData, diffuseColor.rgb, half4(0, 0, 0, 0), 0, 0, diffuse.a);
+    half4 color = UniversalFragmentBlinnPhong(inputData, diffuseColor.rgb, half4(0, 0, 0, 0), 0, 0, diffuse.a);
     color.rgb = MixFog(color.rgb, inputData.fogCoord);
+    color.a = OutputAlpha(color.a);
 
     return color;
 }
@@ -153,7 +156,7 @@ half4 SpeedTree7FragDepth(SpeedTreeVertexDepthOutput input) : SV_Target
 
 #if !defined(SHADER_QUALITY_LOW)
     #ifdef LOD_FADE_CROSSFADE // enable dithering LOD transition if user select CrossFade transition in LOD group
-        LODDitheringTransition(input.clipPos.xyz, unity_LODFade.x);
+        LODDitheringTransition(input.clipPos.xy, unity_LODFade.x);
     #endif
 #endif
 

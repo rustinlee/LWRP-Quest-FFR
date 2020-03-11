@@ -1,10 +1,11 @@
 using System;
+using UnityEngine.Scripting.APIUpdating;
 using UnityEngine.Serialization;
 
-namespace UnityEngine.Experimental.Rendering.LWRP
+namespace UnityEngine.Experimental.Rendering.Universal
 {
     [Serializable]
-    public struct Light2DBlendStyle
+    [MovedFrom("UnityEngine.Experimental.Rendering.LWRP")] public struct Light2DBlendStyle
     {
         internal enum TextureChannel
         {
@@ -46,7 +47,6 @@ namespace UnityEngine.Experimental.Rendering.LWRP
             public float additive;
         }
 
-        public bool enabled;
         public string name;
 
         [SerializeField]

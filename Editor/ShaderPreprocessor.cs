@@ -2,25 +2,27 @@ using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
 using UnityEngine;
-using UnityEngine.Rendering.LWRP;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.Rendering;
 
-namespace UnityEditor.Rendering.LWRP
+namespace UnityEditor.Rendering.Universal
 {
+    [Flags]
+    enum ShaderFeatures
+    {
+        MainLight = (1 << 0),
+        MainLightShadows = (1 << 1),
+        AdditionalLights = (1 << 2),
+        AdditionalLightShadows = (1 << 3),
+        VertexLighting = (1 << 4),
+        SoftShadows = (1 << 5),
+        MixedLighting = (1 << 6),
+        TerrainHoles = (1 << 7)
+    }
     internal class ShaderPreprocessor : IPreprocessShaders
     {
-        [Flags]
-        enum ShaderFeatures
-        {
-            MainLight = (1 << 0),
-            MainLightShadows = (1 << 1),
-            AdditionalLights = (1 << 2),
-            AdditionalLightShadows = (1 << 3),
-            VertexLighting = (1 << 4),
-            SoftShadows = (1 << 5),
-            MixedLighting = (1 << 6),
-        }
 
         ShaderKeyword m_MainLightShadows = new ShaderKeyword(ShaderKeywordStrings.MainLightShadows);
         ShaderKeyword m_AdditionalLightsVertex = new ShaderKeyword(ShaderKeywordStrings.AdditionalLightsVertex);
@@ -31,7 +33,7 @@ namespace UnityEditor.Rendering.LWRP
         ShaderKeyword m_MixedLightingSubtractive = new ShaderKeyword(ShaderKeywordStrings.MixedLightingSubtractive);
         ShaderKeyword m_Lightmap = new ShaderKeyword("LIGHTMAP_ON");
         ShaderKeyword m_DirectionalLightmap = new ShaderKeyword("DIRLIGHTMAP_COMBINED");
-        ShaderKeyword m_KillAlpha = new ShaderKeyword("_KILL_ALPHA");
+        ShaderKeyword m_AlphaTestOn = new ShaderKeyword("_ALPHATEST_ON");
 
         ShaderKeyword m_DeprecatedVertexLights = new ShaderKeyword("_VERTEX_LIGHTS");
         ShaderKeyword m_DeprecatedShadowsEnabled = new ShaderKeyword("_SHADOWS_ENABLED");
@@ -47,21 +49,9 @@ namespace UnityEditor.Rendering.LWRP
 
         bool StripUnusedShader(ShaderFeatures features, Shader shader, ShaderCompilerData compilerData)
         {
-            if (shader.name.Contains("HDRP"))
-                return true;
-
             if (!CoreUtils.HasFlag(features, ShaderFeatures.MainLightShadows) &&
                 shader.name.Contains("ScreenSpaceShadows"))
                 return true;
-
-            if (shader.name == "Hidden/Lightweight Render Pipeline/Blit")
-            {
-                bool preserveAlpha = PlayerSettings.preserveFramebufferAlpha && compilerData.platformKeywordSet.IsEnabled(BuiltinShaderDefine.SHADER_API_MOBILE);
-                bool shaderPreserveAlpha = !compilerData.shaderKeywordSet.IsEnabled(m_KillAlpha);
-
-                if (preserveAlpha != shaderPreserveAlpha)
-                    return true;
-            }
 
             return false;
         }
@@ -78,7 +68,7 @@ namespace UnityEditor.Rendering.LWRP
             return false;
         }
 
-        bool StripUnusedFeatures(ShaderFeatures features, ShaderCompilerData compilerData)
+        bool StripUnusedFeatures(ShaderFeatures features, Shader shader, ShaderCompilerData compilerData)
         {
             // strip main light shadows and cascade variants
             if (!CoreUtils.HasFlag(features, ShaderFeatures.MainLightShadows))
@@ -116,6 +106,11 @@ namespace UnityEditor.Rendering.LWRP
                 !CoreUtils.HasFlag(features, ShaderFeatures.MixedLighting))
                 return true;
 
+            bool isBuiltInTerrainLit = shader.name.Contains("Universal Render Pipeline/Terrain/Lit");
+            if (isBuiltInTerrainLit && compilerData.shaderKeywordSet.IsEnabled(m_AlphaTestOn) &&
+               !CoreUtils.HasFlag(features, ShaderFeatures.TerrainHoles))
+                return true;
+
             return false;
         }
 
@@ -148,7 +143,7 @@ namespace UnityEditor.Rendering.LWRP
             if (!isShadowVariant && compilerData.shaderKeywordSet.IsEnabled(m_SoftShadows))
                 return true;
 
-            if (isAdditionalShadow && !compilerData.shaderKeywordSet.IsEnabled(m_AdditionalLightsPixel)) 
+            if (isAdditionalShadow && !compilerData.shaderKeywordSet.IsEnabled(m_AdditionalLightsPixel))
                 return true;
 
             return false;
@@ -179,7 +174,7 @@ namespace UnityEditor.Rendering.LWRP
             if (StripUnusedPass(features, snippetData))
                 return true;
 
-            if (StripUnusedFeatures(features, compilerData))
+            if (StripUnusedFeatures(features, shader, compilerData))
                 return true;
 
             if (StripUnsupportedVariants(compilerData))
@@ -196,7 +191,7 @@ namespace UnityEditor.Rendering.LWRP
 
         void LogShaderVariants(Shader shader, ShaderSnippetData snippetData, ShaderVariantLogLevel logLevel, int prevVariantsCount, int currVariantsCount)
         {
-            if (logLevel == ShaderVariantLogLevel.AllShaders || shader.name.Contains("Lightweight Render Pipeline"))
+            if (logLevel == ShaderVariantLogLevel.AllShaders || shader.name.Contains("Universal Render Pipeline"))
             {
                 float percentageCurrent = (float)currVariantsCount / (float)prevVariantsCount * 100f;
                 float percentageTotal = (float)m_TotalVariantsOutputCount / (float)m_TotalVariantsInputCount * 100f;
@@ -212,32 +207,70 @@ namespace UnityEditor.Rendering.LWRP
 
         public void OnProcessShader(Shader shader, ShaderSnippetData snippetData, IList<ShaderCompilerData> compilerDataList)
         {
-            LightweightRenderPipelineAsset lwrpAsset = GraphicsSettings.renderPipelineAsset as LightweightRenderPipelineAsset;
-            if (lwrpAsset == null || compilerDataList == null || compilerDataList.Count == 0)
+            UniversalRenderPipelineAsset urpAsset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
+            if (urpAsset == null || compilerDataList == null || compilerDataList.Count == 0)
                 return;
-
-            ShaderFeatures features = GetSupportedShaderFeatures(lwrpAsset);
 
             int prevVariantCount = compilerDataList.Count;
 
             for (int i = 0; i < compilerDataList.Count; ++i)
             {
-                if (StripUnused(features, shader, snippetData, compilerDataList[i]))
+                if (StripUnused(ShaderBuildPreprocessor.supportedFeatures, shader, snippetData, compilerDataList[i]))
                 {
                     compilerDataList.RemoveAt(i);
                     --i;
                 }
             }
 
-            if (lwrpAsset.shaderVariantLogLevel != ShaderVariantLogLevel.Disabled)
+            if (urpAsset.shaderVariantLogLevel != ShaderVariantLogLevel.Disabled)
             {
                 m_TotalVariantsInputCount += prevVariantCount;
                 m_TotalVariantsOutputCount += compilerDataList.Count;
-                LogShaderVariants(shader, snippetData, lwrpAsset.shaderVariantLogLevel, prevVariantCount, compilerDataList.Count);
+                LogShaderVariants(shader, snippetData, urpAsset.shaderVariantLogLevel, prevVariantCount, compilerDataList.Count);
             }
         }
 
-        ShaderFeatures GetSupportedShaderFeatures(LightweightRenderPipelineAsset pipelineAsset)
+        
+    }
+    class ShaderBuildPreprocessor : IPreprocessBuildWithReport
+    {
+        public static ShaderFeatures supportedFeatures
+        {
+            get {
+                if (_supportedFeatures <= 0)
+                {
+                    FetchAllSupportedFeatures();
+                }
+                return _supportedFeatures;
+            }
+        }
+
+        private static ShaderFeatures _supportedFeatures = 0;
+        public int callbackOrder { get { return 0; } }
+
+        public void OnPreprocessBuild(BuildReport report)
+        {
+            FetchAllSupportedFeatures();
+        }
+
+        private static void FetchAllSupportedFeatures()
+        {
+            List<UniversalRenderPipelineAsset> urps = new List<UniversalRenderPipelineAsset>();
+            urps.Add(GraphicsSettings.defaultRenderPipeline as UniversalRenderPipelineAsset);
+            for(int i = 0; i < QualitySettings.names.Length; i++)
+            {
+                urps.Add(QualitySettings.GetRenderPipelineAssetAt(i) as UniversalRenderPipelineAsset);
+            }
+            foreach (UniversalRenderPipelineAsset urp in urps)
+            {
+                if (urp != null)
+                {
+                    _supportedFeatures |= GetSupportedShaderFeatures(urp);
+                }
+            }
+        }
+
+        private static ShaderFeatures GetSupportedShaderFeatures(UniversalRenderPipelineAsset pipelineAsset)
         {
             ShaderFeatures shaderFeatures;
             shaderFeatures = ShaderFeatures.MainLight;
@@ -265,6 +298,9 @@ namespace UnityEditor.Rendering.LWRP
 
             if (pipelineAsset.supportsMixedLighting)
                 shaderFeatures |= ShaderFeatures.MixedLighting;
+
+            if (pipelineAsset.supportsTerrainHoles)
+                shaderFeatures |= ShaderFeatures.TerrainHoles;
 
             return shaderFeatures;
         }

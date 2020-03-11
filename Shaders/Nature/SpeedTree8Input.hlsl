@@ -1,5 +1,5 @@
-#ifndef LIGHTWEIGHT_SPEEDTREE8_INPUT_INCLUDED
-#define LIGHTWEIGHT_SPEEDTREE8_INPUT_INCLUDED
+#ifndef UNIVERSAL_SPEEDTREE8_INPUT_INCLUDED
+#define UNIVERSAL_SPEEDTREE8_INPUT_INCLUDED
 
 #ifdef EFFECT_BUMP
     #define _NORMALMAP
@@ -7,8 +7,8 @@
 
 #define _ALPHATEST_ON
 
-#include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Core.hlsl"
-#include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/SurfaceInput.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
 
 #if defined(ENABLE_WIND) && !defined(_WINDQUALITY_NONE)
     #define SPEEDTREE_Y_UP

@@ -2,12 +2,12 @@
 // Only directional light is supported for lit particles
 // No shadow
 // No distortion
-Shader "Lightweight Render Pipeline/Particles/Simple Lit"
+Shader "Universal Render Pipeline/Particles/Simple Lit"
 {
     Properties
     {
-        _BaseMap("Base Map", 2D) = "white" {}
-        _BaseColor("Base Color", Color) = (1,1,1,1)
+        [MainTexture] _BaseMap("Base Map", 2D) = "white" {}
+        [MainColor]   _BaseColor("Base Color", Color) = (1,1,1,1)
 
         _Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
 
@@ -20,10 +20,11 @@ Shader "Lightweight Render Pipeline/Particles/Simple Lit"
 
         _EmissionColor("Color", Color) = (0,0,0)
         _EmissionMap("Emission", 2D) = "white" {}
-        
+
         [HideInInspector] _SmoothnessSource("Smoothness Source", Float) = 0.0
         [ToggleOff] _SpecularHighlights("Specular Highlights", Float) = 1.0
-        
+        _ReceiveShadows("Receive Shadows", Float) = 1.0
+
         // -------------------------------------
         // Particle specific
         _SoftParticlesNearFadeDistance("Soft Particles Near Fade", Float) = 0.0
@@ -43,7 +44,7 @@ Shader "Lightweight Render Pipeline/Particles/Simple Lit"
         [HideInInspector] _DstBlend("__dst", Float) = 0.0
         [HideInInspector] _ZWrite("__zw", Float) = 1.0
         [HideInInspector] _Cull("__cull", Float) = 2.0
-        
+
         // Particle specific
         [HideInInspector] _ColorMode("_ColorMode", Float) = 0.0
         [HideInInspector] _BaseColorAddSubDiff("_ColorMode", Vector) = (0,0,0,0)
@@ -54,10 +55,10 @@ Shader "Lightweight Render Pipeline/Particles/Simple Lit"
         [HideInInspector] _CameraFadeParams("__camerafadeparams", Vector) = (0,0,0,0)
         [HideInInspector] _DistortionEnabled("__distortionenabled", Float) = 0.0
         [HideInInspector] _DistortionStrengthScaled("Distortion Strength Scaled", Float) = 0.1
-        
+
         // Editmode props
         [HideInInspector] _QueueOffset("Queue offset", Float) = 0.0
-        
+
         // ObsoleteProperties
         [HideInInspector] _FlipbookMode("flipbook", Float) = 0
         [HideInInspector] _Glossiness("gloss", Float) = 0
@@ -67,22 +68,22 @@ Shader "Lightweight Render Pipeline/Particles/Simple Lit"
 
     SubShader
     {
-        Tags{"RenderType" = "Opaque" "IgnoreProjector" = "True" "PreviewType" = "Plane" "PerformanceChecks" = "False" "RenderPipeline" = "LightweightPipeline"}
-        
+        Tags{"RenderType" = "Opaque" "IgnoreProjector" = "True" "PreviewType" = "Plane" "PerformanceChecks" = "False" "RenderPipeline" = "UniversalPipeline"}
+
         // ------------------------------------------------------------------
         //  Forward pass.
         Pass
         {
-            // Lightmode matches the ShaderPassName set in LightweightRenderPipeline.cs. SRPDefaultUnlit and passes with
-            // no LightMode tag are also rendered by Lightweight Render Pipeline
+            // Lightmode matches the ShaderPassName set in UniversalRenderPipeline.cs. SRPDefaultUnlit and passes with
+            // no LightMode tag are also rendered by Universal Render Pipeline
             Name "ForwardLit"
-            Tags {"LightMode" = "LightweightForward"}
-            
+            Tags {"LightMode" = "UniversalForward"}
+
             BlendOp[_BlendOp]
             Blend[_SrcBlend][_DstBlend]
             ZWrite[_ZWrite]
             Cull[_Cull]
-            
+
             HLSLPROGRAM
             // Required to compile gles 2.0 with standard SRP library
             // All shaders must be compiled with HLSLcc and currently only gles is not using HLSLcc by default
@@ -97,7 +98,7 @@ Shader "Lightweight Render Pipeline/Particles/Simple Lit"
             #pragma shader_feature _ _SPECGLOSSMAP _SPECULAR_COLOR
             #pragma shader_feature _GLOSSINESS_FROM_BASE_ALPHA
             #pragma shader_feature _RECEIVE_SHADOWS_OFF
-            
+
             // -------------------------------------
             // Particle Keywords
             #pragma shader_feature _ _ALPHAPREMULTIPLY_ON _ALPHAMODULATE_ON
@@ -107,9 +108,9 @@ Shader "Lightweight Render Pipeline/Particles/Simple Lit"
             #pragma shader_feature _SOFTPARTICLES_ON
             #pragma shader_feature _FADING_ON
             #pragma shader_feature _DISTORTION_ON
-            
+
             // -------------------------------------
-            // Lightweight Pipeline keywords
+            // Universal Pipeline keywords
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
             #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
@@ -119,19 +120,19 @@ Shader "Lightweight Render Pipeline/Particles/Simple Lit"
             // -------------------------------------
             // Unity defined keywords
             #pragma multi_compile_fog
-            
+
             #pragma vertex ParticlesLitVertex
             #pragma fragment ParticlesLitFragment
             #define BUMP_SCALE_NOT_SUPPORTED 1
-            
-            #include "Packages/com.unity.render-pipelines.lightweight/Shaders/Particles/ParticlesSimpleLitInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.lightweight/Shaders/Particles/ParticlesSimpleLitForwardPass.hlsl"
+
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/Particles/ParticlesSimpleLitInput.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/Particles/ParticlesSimpleLitForwardPass.hlsl"
             ENDHLSL
         }
         Pass
         {
-            Name "Lightweight2D"
-            Tags{ "LightMode" = "Lightweight2D" }
+            Name "Universal2D"
+            Tags{ "LightMode" = "Universal2D" }
 
             Blend[_SrcBlend][_DstBlend]
             ZWrite[_ZWrite]
@@ -147,12 +148,12 @@ Shader "Lightweight Render Pipeline/Particles/Simple Lit"
             #pragma shader_feature _ALPHATEST_ON
             #pragma shader_feature _ALPHAPREMULTIPLY_ON
 
-            #include "Packages/com.unity.render-pipelines.lightweight/Shaders/Particles/ParticlesSimpleLitInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.lightweight/Shaders/Utils/Lightweight2D.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/UnlitInput.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/Utils/Universal2D.hlsl"
             ENDHLSL
         }
     }
 
-    Fallback "Lightweight Render Pipeline/Particles/Unlit"
-    CustomEditor "UnityEditor.Rendering.LWRP.ShaderGUI.ParticlesSimpleLitShader"
+    Fallback "Universal Render Pipeline/Particles/Unlit"
+    CustomEditor "UnityEditor.Rendering.Universal.ShaderGUI.ParticlesSimpleLitShader"
 }

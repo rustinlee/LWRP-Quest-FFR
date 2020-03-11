@@ -1,7 +1,7 @@
-#ifndef LIGHTWEIGHT_SIMPLE_LIT_PASS_INCLUDED
-#define LIGHTWEIGHT_SIMPLE_LIT_PASS_INCLUDED
+#ifndef UNIVERSAL_SIMPLE_LIT_PASS_INCLUDED
+#define UNIVERSAL_SIMPLE_LIT_PASS_INCLUDED
 
-#include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Lighting.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
 struct Attributes
 {
@@ -21,17 +21,17 @@ struct Varyings
     float3 posWS                    : TEXCOORD2;    // xyz: posWS
 
 #ifdef _NORMALMAP
-    half4 normal                    : TEXCOORD3;    // xyz: normal, w: viewDir.x
-    half4 tangent                   : TEXCOORD4;    // xyz: tangent, w: viewDir.y
-    half4 bitangent                  : TEXCOORD5;    // xyz: bitangent, w: viewDir.z
+    float4 normal                   : TEXCOORD3;    // xyz: normal, w: viewDir.x
+    float4 tangent                  : TEXCOORD4;    // xyz: tangent, w: viewDir.y
+    float4 bitangent                : TEXCOORD5;    // xyz: bitangent, w: viewDir.z
 #else
-    half3  normal                   : TEXCOORD3;
-    half3 viewDir                   : TEXCOORD4;
+    float3  normal                  : TEXCOORD3;
+    float3 viewDir                  : TEXCOORD4;
 #endif
 
     half4 fogFactorAndVertexLight   : TEXCOORD6; // x: fogFactor, yzw: vertex light
 
-#ifdef _MAIN_LIGHT_SHADOWS
+#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
     float4 shadowCoord              : TEXCOORD7;
 #endif
 
@@ -57,11 +57,15 @@ void InitializeInputData(Varyings input, half3 normalTS, out InputData inputData
     viewDirWS = SafeNormalize(viewDirWS);
 
     inputData.viewDirectionWS = viewDirWS;
-#if defined(_MAIN_LIGHT_SHADOWS) && !defined(_RECEIVE_SHADOWS_OFF)
+
+#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
     inputData.shadowCoord = input.shadowCoord;
+#elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+    inputData.shadowCoord = TransformWorldToShadowCoord(inputData.positionWS);
 #else
     inputData.shadowCoord = float4(0, 0, 0, 0);
 #endif
+
     inputData.fogCoord = input.fogFactorAndVertexLight.x;
     inputData.vertexLighting = input.fogFactorAndVertexLight.yzw;
     inputData.bakedGI = SAMPLE_GI(input.lightmapUV, input.vertexSH, inputData.normalWS);
@@ -104,7 +108,7 @@ Varyings LitPassVertexSimple(Attributes input)
 
     output.fogFactorAndVertexLight = half4(fogFactor, vertexLight);
 
-#if defined(_MAIN_LIGHT_SHADOWS) && !defined(_RECEIVE_SHADOWS_OFF)
+#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
     output.shadowCoord = GetShadowCoord(vertexInput);
 #endif
 
@@ -135,8 +139,10 @@ half4 LitPassFragmentSimple(Varyings input) : SV_Target
     InputData inputData;
     InitializeInputData(input, normalTS, inputData);
 
-    half4 color = LightweightFragmentBlinnPhong(inputData, diffuse, specular, smoothness, emission, alpha);
+    half4 color = UniversalFragmentBlinnPhong(inputData, diffuse, specular, smoothness, emission, alpha);
     color.rgb = MixFog(color.rgb, inputData.fogCoord);
+    color.a = OutputAlpha(color.a);
+
     return color;
 };
 

@@ -1,12 +1,12 @@
-#ifndef LIGHTWEIGHT_SPEEDTREE7COMMON_INPUT_INCLUDED
-#define LIGHTWEIGHT_SPEEDTREE7COMMON_INPUT_INCLUDED
+#ifndef UNIVERSAL_SPEEDTREE7COMMON_INPUT_INCLUDED
+#define UNIVERSAL_SPEEDTREE7COMMON_INPUT_INCLUDED
 
 #ifdef EFFECT_BUMP
     #define _NORMALMAP
 #endif
 
-#include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Core.hlsl"
-#include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/SurfaceInput.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
 
 #ifdef ENABLE_WIND
     #define WIND_QUALITY_NONE       0

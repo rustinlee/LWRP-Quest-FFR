@@ -1,8 +1,8 @@
-#ifndef LIGHTWEIGHT_SIMPLE_LIT_INPUT_INCLUDED
-#define LIGHTWEIGHT_SIMPLE_LIT_INPUT_INCLUDED
+#ifndef UNIVERSAL_SIMPLE_LIT_INPUT_INCLUDED
+#define UNIVERSAL_SIMPLE_LIT_INPUT_INCLUDED
 
-#include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Core.hlsl"
-#include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/SurfaceInput.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
 
 CBUFFER_START(UnityPerMaterial)
 float4 _BaseMap_ST;
@@ -11,6 +11,20 @@ half4 _SpecColor;
 half4 _EmissionColor;
 half _Cutoff;
 CBUFFER_END
+
+#ifdef UNITY_DOTS_INSTANCING_ENABLED
+UNITY_DOTS_INSTANCING_START(MaterialPropertyMetadata)
+    UNITY_DOTS_INSTANCED_PROP(float4, _BaseColor)
+    UNITY_DOTS_INSTANCED_PROP(float4, _SpecColor)
+    UNITY_DOTS_INSTANCED_PROP(float4, _EmissionColor)
+    UNITY_DOTS_INSTANCED_PROP(float , _Cutoff)
+UNITY_DOTS_INSTANCING_END(MaterialPropertyMetadata)
+
+#define _BaseColor          UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(half4 , Metadata__BaseColor)
+#define _SpecColor          UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(half4 , Metadata__SpecColor)
+#define _EmissionColor      UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(half4 , Metadata__EmissionColor)
+#define _Cutoff             UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(half  , Metadata__Cutoff)
+#endif
 
 TEXTURE2D(_SpecGlossMap);       SAMPLER(sampler_SpecGlossMap);
 

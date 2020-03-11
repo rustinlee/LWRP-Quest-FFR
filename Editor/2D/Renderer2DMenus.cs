@@ -1,12 +1,12 @@
 using UnityEngine;
-using UnityEngine.Experimental.Rendering.LWRP;
-using UnityEngine.Rendering.LWRP;
+using UnityEngine.Experimental.Rendering.Universal;
+using UnityEngine.Rendering.Universal;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEditor.ProjectWindowCallback;
 using UnityEngine.Rendering;
 
-namespace UnityEditor.Experimental.Rendering.LWRP
+namespace UnityEditor.Experimental.Rendering.Universal
 {
     static class Renderer2DMenus
     {
@@ -18,6 +18,7 @@ namespace UnityEditor.Experimental.Rendering.LWRP
                 SceneView view = SceneView.lastActiveSceneView;
                 if (!view)
                     view = sceneViews[0] as SceneView;
+
                 if (view)
                     view.MoveToView(go.transform);
             }
@@ -43,6 +44,7 @@ namespace UnityEditor.Experimental.Rendering.LWRP
             {
                 PlaceGameObjectInFrontOfSceneView(go);
                 StageUtility.PlaceGameObjectInCurrentStage(go); // may change parent
+                go.transform.position = new Vector3(go.transform.position.x, go.transform.position.y, 0);
             }
 
             // Only at this point do we know the actual parent of the object and can modify its name accordingly.
@@ -71,16 +73,7 @@ namespace UnityEditor.Experimental.Rendering.LWRP
 
         static bool CreateLightValidation()
         {
-            LightweightRenderPipeline pipeline = UnityEngine.Rendering.RenderPipelineManager.currentPipeline as LightweightRenderPipeline;
-            if (pipeline != null)
-            {
-                LightweightRenderPipelineAsset asset = LightweightRenderPipeline.asset;
-                Renderer2DData assetData = asset.scriptableRendererData as Renderer2DData;
-                if (assetData != null)
-                    return true;
-            }
-
-            return false;
+            return Light2DEditorUtility.IsUsing2DRenderer();
         }
 
         [MenuItem("GameObject/Light/2D/Freeform Light 2D (Experimental)", false, -100)]
@@ -140,7 +133,7 @@ namespace UnityEditor.Experimental.Rendering.LWRP
             return CreateLightValidation();
         }
 
-        [MenuItem("Assets/Create/Rendering/Lightweight Render Pipeline/2D Renderer (Experimental)", priority = CoreUtils.assetCreateMenuPriority1 + 1)]
+        [MenuItem("Assets/Create/Rendering/Universal Render Pipeline/2D Renderer (Experimental)", priority = CoreUtils.assetCreateMenuPriority2 + 1)]
         static void Create2DRendererData()
         {
             Renderer2DData.Create2DRendererData((instance) =>

@@ -1,7 +1,7 @@
-#ifndef LIGHTWEIGHT_PARTICLES_LIT_INPUT_INCLUDED
-#define LIGHTWEIGHT_PARTICLES_LIT_INPUT_INCLUDED
+#ifndef UNIVERSAL_PARTICLES_LIT_INPUT_INCLUDED
+#define UNIVERSAL_PARTICLES_LIT_INPUT_INCLUDED
 
-#include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Particles.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Particles.hlsl"
 
 CBUFFER_START(UnityPerMaterial)
 float4 _SoftParticleFadeParams;
@@ -45,13 +45,13 @@ half4 SampleAlbedo(float2 uv, float3 blendUv, half4 color, float4 particleColor,
 #endif
     // No distortion Support
     albedo = MixParticleColor(albedo, particleColor, colorAddSubDiff);
-    
+
     AlphaDiscard(albedo.a, _Cutoff);
-    
- #if defined(_SOFTPARTICLES_ON)
-     ALBEDO_MUL -= 1 - SoftParticles(SOFT_PARTICLE_NEAR_FADE, SOFT_PARTICLE_INV_FADE_DISTANCE, projectedPosition);
- #endif
- 
+
+#if defined(_SOFTPARTICLES_ON)
+        ALBEDO_MUL *= SoftParticles(SOFT_PARTICLE_NEAR_FADE, SOFT_PARTICLE_INV_FADE_DISTANCE, projectedPosition);
+#endif
+
  #if defined(_FADING_ON)
      ALBEDO_MUL *= CameraFade(CAMERA_NEAR_FADE, CAMERA_INV_FADE_DISTANCE, projectedPosition);
  #endif
@@ -71,11 +71,11 @@ inline void InitializeParticleLitSurfaceData(float2 uv, float3 blendUv, float4 p
 #endif
 
     half3 normalTS = SampleNormalTS(uv, blendUv, TEXTURE2D_ARGS(_BumpMap, sampler_BumpMap), _BumpScale);
-    
+
 #if defined(_EMISSION)
-    half3 emission = BlendTexture(TEXTURE2D_ARGS(_EmissionMap, sampler_EmissionMap), uv, blendUv) * _EmissionColor.rgb;
+    half3 emission = BlendTexture(TEXTURE2D_ARGS(_EmissionMap, sampler_EmissionMap), uv, blendUv).rgb * _EmissionColor.rgb;
 #else
-    half3 emission = half3(0 ,0 ,0 );
+    half3 emission = half3(0, 0, 0);
 #endif
 
 #if defined(_DISTORTION_ON)
@@ -94,4 +94,4 @@ inline void InitializeParticleLitSurfaceData(float2 uv, float3 blendUv, float4 p
     outSurfaceData.alpha = albedo.a;
 }
 
-#endif // LIGHTWEIGHT_PARTICLES_LIT_INPUT_INCLUDED
+#endif // UNIVERSAL_PARTICLES_LIT_INPUT_INCLUDED
